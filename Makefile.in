@@ -1,0 +1,26 @@
+##
+##  Makefile -- Build procedure for doshelper Apache module
+##
+#   the used tools
+APXS=@APXS@
+
+#   additional defines, includes and libraries
+DEFS=-Wall
+#INCLUDES=-I/usr/local/include/hiredis
+LIBS=@LIBHIREDIS_LDFLAGS@
+#LIBS=-L/usr/local/lib -lhiredis
+#LIBS=/usr/local/lib/libhiredis.a
+SRCS=mod_doshelper.c
+
+#   the default target
+all:
+	$(APXS) -c $(DEFS) $(INCLUDES) $(LIBS) $(SRCS)
+
+#   install the shared object file into Apache 
+install:
+	$(APXS) -c -i $(DEFS) $(INCLUDES) $(LIBS) $(SRCS)
+
+#   cleanup
+clean:
+	-rm -f *.o *.lo *.slo *.la 
+

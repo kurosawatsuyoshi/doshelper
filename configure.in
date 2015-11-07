@@ -1,0 +1,46 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ([2.63])
+AC_INIT([mod_doshelper], [1.0.0], [kurosawa.tsuyoshi@jamhelper.com])
+AC_CONFIG_SRCDIR([mod_doshelper.c])
+AC_CONFIG_HEADERS([config.h])
+
+# Checks for programs.
+AC_PROG_CC
+
+# Checks for libraries.
+# FIXME: Replace `main' with a function in `-lhiredis':
+AC_CHECK_LIB(hiredis, [main], [
+AC_DEFINE([HAVE_LIBHIREDIS], [1], [Have found libhiredis])
+LIBHIREDIS_LDFLAGS='-lhiredis'
+AC_SUBST(LIBHIREDIS_LDFLAGS)
+],
+[AC_MSG_ERROR([libhiredis was not found])])
+
+# Checks for header files.
+AC_CHECK_HEADER([hiredis/hiredis.h], [
+AC_DEFINE(HAVE_HIREDIS_H)
+],
+AC_MSG_ERROR([hiredis.h not found.]))
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_SIZE_T
+
+# Checks for library functions.
+AC_CHECK_FUNCS([strchr strstr strtol])
+
+# Checks for apxs functions.
+AC_ARG_WITH(apxs,
+AC_HELP_STRING([--with-apxs=NAME], [name of your apxs executable [[apxs]]]),
+[APXS="$with_apxs"])
+if test -z "${APXS}"; then
+AC_PATH_PROGS(APXS, apxs2 apxs, no, [$PATH:/usr/sbin:/usr/local/apache2/bin])
+fi
+if test "$APXS" = no; then
+AC_MSG_ERROR([apxs not found. set apxs with --with-apxs.])
+fi
+AC_SUBST(APXS)
+
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
