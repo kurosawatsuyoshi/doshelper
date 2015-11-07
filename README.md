@@ -23,7 +23,7 @@ apache module that protects a 'distributed web server' from DoS attack
 - [Redis](http://redis.io/) 2.4.0 以上
   Redis version >= 2.4.0.  
 
-## Installation
+## Preparation
 ### hiredis
 Redis接続ライブラリ
 ```
@@ -66,13 +66,6 @@ _[Debian]_
 $ sudo apt-get install apache2-prefork-dev
 ```
 
-### doshelper
-```
-$ ./configure
-$ make
-$ sudo make install
-```
-
 ### Redis
 doshelperの動作時に必要です  
 専用サーバが望ましいのですが、DBサーバやウェブサーバへの同居でも構いません  
@@ -92,5 +85,75 @@ $ sudo groupadd redis
 $ sudo useradd -s /sbin/nologin -M -g redis redis
 ```
 
+## Installation
+### doshelper
+```
+$ ./configure
+$ make
+$ sudo make install
+```
+
 ## Configuration
+__DoshelperAction__  
+default [off]  
+doshelperの有効・無効を指定します  
+利用する際には on をセットしてください  
+
+__DoshelperRedisServer__  
+redisサーバを指定 ※空白区切りで複数サーバの指定が可能  
+書式：サーバ名:ポート （サーバ名:ポート）
+デフォルト：なし  
+記載例：localhost:6379  
+
+__DoshelperRedisConnectTimeout__  
+redisコネクトの待ち時間を指定  
+書式：秒 ミリ秒  
+デフォルト：0.5ミリ秒  
+記述例：0 50000  
+
+__DoshelperRedisRequirepass__
+redis接続パスワードを指定  
+tiger
+# DoshelperRedisDatabase 0
+
+DoshelperIgnoreContentType (javascript|image|css|flash|x-font-ttf)
+
+## defense of the DoS of web site
+## 60 Seconds Shut-out at 10 Requests to 30 Seconds
+DoshelperCommmonDosAction on
+DoshelperDosCheckTime  30
+DoshelperDosRequest    10
+DoshelperDosWaitTime   60
+
+## defense of the DoS of url unit
+## 120 Seconds Shut-out at 3 Requests to 5 Seconds
+DoshelperDosCase "^/foo/bar.php" ctime="5" request="3" wtime="120"
+## 5 Seconds Shut-out at 15 Requests to 10 Seconds
+DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"
+
+## setting of the return code or block screen
+DoshelperReturnType 403
+#DoshelperDosFilePath /var/www/doshelper/control/dos.html
+
+# setting of the ip control
+DoshelperControlAction off
+# uri
+DoshelperIpWhiteList  "/whitelist"
+DoshelperIpWhiteSet   "/whitelistset"
+DoshelperIpWhiteDel   "/whitelistdelete"
+DoshelperIpBlackList  "/blacklist"
+DoshelperIpBlackSet   "/blacklistset"
+DoshelperIpBlackDel   "/blacklistdelete"
+DoshelperControlFree  60
+DoshelperDisplayCount 100
+# template file
+DoshelperIpSetFormFilePath /var/www/doshelper/control/setform.html
+DoshelperIpCompleteFilePath /var/www/doshelper/control/complete.html
+DoshelperIpListFilePath  /var/www/doshelper/control/list.html
+
+</IfModule>
+
+# setting of the log
+LogFormat  "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %D %T %p \"%{DH_DOS}e\" \"%{DH_CNT}e\"" doshelper_doslog
+CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS
 
