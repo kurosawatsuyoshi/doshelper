@@ -1,0 +1,31 @@
+<html>
+<body>
+<b>$_["proc"]</b> Form<br/>
+<div align="left"><font size="5" color="red">$_["ip"]</font></div>
+<hr />
+WhiteList :
+<a style="text-decoration: none" target="_parent" href="$_["whitelist"]"><input type="button" value="LIST" /></a>
+<a style="text-decoration: none" target="_parent" href="$_["whiteset"]"><input type="button" value="SET" /></a>
+<a style="text-decoration: none" target="_parent" href="$_["whitedel"]"><input type="button" value="DELETE" /></a>
+BlackList :
+<a style="text-decoration: none" target="_parent" href="$_["blacklist"]"><input type="button" value="LIST" /></a>
+<a style="text-decoration: none" target="_parent" href="$_["blackset"]"><input type="button" value="SET" /></a>
+<a style="text-decoration: none" target="_parent" href="$_["blackdel"]"><input type="button" value="DELETE" /></a>
+<hr />
+<form action="$_["uri"]" method="get" />
+<b>$_["proc"]</b><br/>
+<input type="text" name="value" size="32" style="ime-mode: disabled;" required />
+<input type="submit" value="set" />
+</form>
+<hr />
+WhiteList :
+<a style="text-decoration: none" target="_parent" href="$_["whitelist"]"><input type="button" value="LIST" /></a>
+<a style="text-decoration: none" target="_parent" href="$_["whiteset"]"><input type="button" value="SET" /></a>
+<a style="text-decoration: none" target="_parent" href="$_["whitedel"]"><input type="button" value="DELETE" /></a>
+BlackList :
+<a style="text-decoration: none" target="_parent" href="$_["blacklist"]"><input type="button" value="LIST" /></a>
+<a style="text-decoration: none" target="_parent" href="$_["blackset"]"><input type="button" value="SET" /></a>
+<a style="text-decoration: none" target="_parent" href="$_["blackdel"]"><input type="button" value="DELETE" /></a>
+<hr />
+</body>
+</html>
