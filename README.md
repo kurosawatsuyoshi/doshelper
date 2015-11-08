@@ -143,63 +143,62 @@ CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS
   
 __DoshelperAction__  
 doshelperを有効にする場合は on をセットします  
-***
 書式：on or off  
 デフォルト：off  
 記載例：DoshelperAction  on  
-***  
+***
+
 __DoshelperRedisServer__  
 redisサーバを指定します ※ 空白区切りで複数のRedisサーバが指定できます  
-***
 書式：サーバ名:ポート （サーバ名:ポート）  
 デフォルト：なし  
 記載例：DoshelperRedisServer  localhost:6379  localhost:6380  
-***  
+***
+
 __DoshelperRedisConnectTimeout__  
 redisコネクトのタイムアウトを指定します。 応答速度にあわせ調整可能です  
-***
 書式：秒 (空白) マイクロ秒  
 デフォルト：0.05ミリ秒  
 記述例：DoshelperRedisConnectTimeout  0  050000  
-***  
+***
+
 __DoshelperRedisRequirepass__  
 redis接続パスワードを指定します  
-***
 書式：文字列  
 デフォルト：なし  
 記述例：DoshelperRedisRequirepass  tiger  
-***  
+***
+
 __DoshelperRedisDatabase__  
 16個のデータベース領域（デフォルト）で利用するデータベース領域を数値で指定します  
-***
 書式：数値（0〜15）  
 デフォルト：0  
 記述例：DoshelperRedisDatabase  0  
-***  
+***
+
 __DoshelperIgnoreContentType__
 処理対象外とするコンテントタイプを指定します  
 SetEnvIfの拡張子除外と合わせて活用します  
-***
 書式：文字列 ※ 複数指定時はパイプ（｜）文字で連結します  
 デフォルト：なし  
 記述例：DoshelperIgnoreContentType  (javascript|image|css|flash|x-font-ttf)  
 ***
+
 ### Setting of the DoS pattern
 DoS攻撃とみなす閾値を設定します  
 サイト全体とURL単位の2パターンで設定ができます  
 
 __DoshelperCommmonDosAction__  
 サイト全体に適用する閾値を利用する場合 on を指定します  
-***
 書式：on or off  
 デフォルト：off  
 記述例：DoshelperCommmonDosAction  on  
-***  
+***
+
 __DoshelperDosCheckTime__  
 __DoshelperDosRequest__  
 __DoshelperDosWaitTime__  
 サイト全体に適用する遮断の閾値を設定します  
-***
 書式：数値  
 デフォルト：なし  
 記述例：30秒間に同一IPから10回のリクエストで、60秒間遮断するケース  
@@ -207,11 +206,11 @@ __DoshelperDosWaitTime__
 DoshelperDosCheckTime  30  
 DoshelperDosRequest    10  
 DoshelperDosWaitTime   60  
-***  
+***
+
 __DoshelperDosCase__  
 URL単位で遮断するケースで利用します  
 defense of the DoS of url unit.  
-***
 書式：ctime="チェックする秒" request="リクエスト回数" wtime="遮断時間（秒）"  
 デフォルト：なし  
 記述例：  
@@ -222,36 +221,37 @@ DoshelperDosCase "^/foo/bar.php" ctime="5" request="3" wtime="120"
 "/cgi-bin/hoge/"のディレクトリ配下のURLに対し、10秒間に15回以上のリクエストで5秒遮断するケース  
 "/cgi-bin/hoge/" is, 5 Seconds Shut-out at 15 Requests to 10 Seconds.  
 DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"  
-***  
+***
+
 ### Setting of the block pattern
 レスポンスコード返却、または遮断画面表示の選択が可能です  
 please select the "return the specific response code" or "cut-off screen".  
   
 __DoshelperReturnType__
 遮断時のレスポンスコードを指定します  
-***
 書式：レスポンスコード  
 デフォルト：なし  
 記述例：DoshelperReturnType  403  
 ***
+
 __DoshelperDosFilePath__  
 事前に用意したHTMLを遮断時に表示させます（DoshelperReturnTypeとの併用はできません）  
 配置したファイルとディレクトリは、apacheユーザ（またはグループ）の参照権限を付与してください  
-***
 書式：フルパス名  
 デフォルト：なし  
 記述例：DoshelperDosFilePath  /var/www/doshelper/control/dos.html  
-***  
+***
+
 ### Setting of the ip control
 現在のアクセス状況の確認や、特定のIPを無条件遮断ができる管理画面の指定です  
 
 __DoshelperControlAction__
 IP即時遮断画面（管理画面）の利用有無を指定します  
-***
 書式：on or off
 デフォルト：off
 記述例：DoshelperControlAction  on
-***  
+***
+
 __DoshelperIpWhiteList__
 __DoshelperIpWhiteSet__
 __DoshelperIpWhiteDel__
@@ -262,7 +262,7 @@ __DoshelperControlFree__
 __DoshelperDisplayCount__
 管理画面のURLとアクセス時に遮断適用外とさせる期間（秒）、一覧表示させる件数を指定します  
 指定したパスで管理画面にアクセスするため、既存サイトに存在しないパス かつ セキュリティ観点からもわかりにくいパスを指定してください  
-***
+
 書式：パス名　※ ドキュメントルート以下  
 デフォルト：なし  
 記述例：  
@@ -275,20 +275,22 @@ DoshelperIpBlackDel   "/blacklistdelete"
 DoshelperControlFree  60  
 DoshelperDisplayCount 100  
 ***
+
 __DoshelperIpSetFormFilePath__
 __DoshelperIpCompleteFilePath__
 __DoshelperIpListFilePath__
 管理画面のテンプレートファイルです  
 外部に公開されない（ドキュメントルート外）に配置し、フルパスで記述してください  
 配置したファイルとディレクトリは、apacheユーザ（またはグループ）の参照権限を付与してください  
-***
+
 書式：フルパス名  
 デフォルト：なし  
 記述例；  
 DoshelperIpSetFormFilePath /var/www/doshelper/control/setform.html  
 DoshelperIpCompleteFilePath /var/www/doshelper/control/complete.html  
 DoshelperIpListFilePath  /var/www/doshelper/control/list.html  
-***  
+***
+
 ### Setting of the log
 以下の環境変数に遮断情報がセットされます  
 ログ出力で ¥%{***}e のパラメータで出力することができます  
@@ -299,6 +301,7 @@ DH_CNT：リクエスト回数がセットされます
 LogFormat  "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %D %T %p \"%{DH_DOS}e\" \"%{DH_CNT}e\"" doshelper_doslog  
 CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS  
 ***
+
 ```
 IP - - [07/Nov/2015:18:44:17 +0900] "GET / HTTP/1.1" 200 1160 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:31.0) Gecko/20100101 Firefox/31.0" 11475 0 80 __"DoSAttack" "11"__
 IP - - [07/Nov/2015:18:44:17 +0900] "GET / HTTP/1.1" 200 1160 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:31.0) Gecko/20100101 Firefox/31.0" 12060 0 80 __"DoSAttack" "12"__
@@ -307,6 +310,7 @@ IP - - [07/Nov/2015:18:44:17 +0900] "GET / HTTP/1.1" 200 1160 "-" "Mozilla/5.0 (
 #Appendix
 ## hiredisのパッケージ導入
 CentOSでは hiredis のパッケージ導入が可能です  
+
 _[CentOS 7]_
 ```
 $ wget http://dl.fedoraproject.org/pub/epel/7/x86_64/h/hiredis-0.12.1-1.el7.x86_64.rpm
