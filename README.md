@@ -4,9 +4,9 @@ apache module that protects a 'distributed web server' from DoS attack
 
 ## Description
 アクセス数が一定の閾値を超えた場合、IP単位で自動的にアクセスを遮断します  
-アクセス管理は共有メモリ方式ではなく Redis を採用しているため、複数の分散ウェブサーバ環境でも情報を一元管理しています  
-急なウェブサーバ増減でも閾値を見直す必要がないため、サイト運用の軽減化がはかれます  
-なお Redis に問題が生じた場合は、すべてのアクセスをスルーする仕組みとしているため万一の場合も安心してご利用いただけます  
+アクセス管理は共有メモリ方式ではなく Redis を採用しています  
+よって複数の分散ウェブサーバ環境で急にサーバを増減しても閾値を見直す必要がありません  
+なお Redis に問題が生じた場合は、すべてのアクセスをスルーする仕組みなので万一の場合も安心してご利用いただけます  
 
 ## Features
 - 複数のウェブサーバでアクセス情報を一元管理  
@@ -14,10 +14,12 @@ apache module that protects a 'distributed web server' from DoS attack
 - IP単位で即時遮断  
 
 ウェブサーバを追加しても閾値の見直しは不要です  
-遮断ログから攻撃検知の予測したり、攻撃者のIPを恒久的に遮断することも可能です  
-またウェブサーバのリスタートなしにブラウザからの指定で即時にIP遮断もできます  
+ログ出力結果から攻撃を検知し、攻撃者のIPを恒久的に遮断できます  
+その際の即時IP遮断はブラウザからウェブサーバのリスタート無しで複数サーバに一度にセットできます  
+このようにサイト運用の効率化・軽減化を目的としています  
 
 ## Requirement
+導入に必要な要件です  
 - [hiredis](https://github.com/redis/hiredis)
 - apxs
 - [Redis](http://redis.io/)  Redis version >= 2.4.0.  
@@ -26,7 +28,7 @@ apache module that protects a 'distributed web server' from DoS attack
 ビルドにあたり事前のセットアップが必要です  
 
 ### hiredis
-Redis接続ライブラリでビルド時に必要となります  
+Redis接続ライブラリです
 ```
 $ wget -O hiredis.zip https://github.com/redis/hiredis/archive/master.zip
 $ unzip hiredis.zip
@@ -36,21 +38,23 @@ $ sudo make install
 ```
 
 ### apxs
-apacheモジュールのコンパイル・リンクに必要なツールです  
+apacheモジュールのコンパイル・リンクに必要なツールです
+
 _[CentOS/Fedora]_
 ```
 $ sudo yum install httpd-devel
 ```
+
 _[Debian/Ubuntu]_
 ```
 $ sudo apt-get install apache2-prefork-dev
 ```
 
 ### Redis
-doshelperの動作時に必要です  
-専用サーバへの導入が望ましいのですが、DBサーバやウェブサーバへ同居でも構いません  
-なおDMZ配置（ウェブサーバ同居）の場合は、アクセス元IPを制限するなどのセキュア対策が必要です  
-その他、詳細な設定方法後述のAppendix 「Redis設定」を参照してください  
+doshelper動作時に必要です  
+専用サーバ導入が望ましいのですが、DBサーバやウェブサーバへ同居でも構いません  
+なおDMZ（ウェブサーバ同居）配置の場合は、IP制限などのセキュア対策が必要なため、後述のAppendix「Redis設定」を参照してください  
+
 [redisダウンロード](http://redis.io/download)
 ```
 $ wget http://download.redis.io/releases/redis-2.8.23.tar.gz
@@ -61,7 +65,7 @@ $ sudo make install
 ```
 
 ## Installation
-### doshelper
+### mod_doshelper
 ```
 $ ./configure
 $ make
@@ -69,9 +73,10 @@ $ sudo make install
 ```
 
 ## Configuration
-サンプルの設定ファイルです  
-配布ソースの"sample"ディレクトリに設定ファイルおよび各種テンプレートファイルを格納していますので参考にしてください  
+設定ファイルのサンプルです  
+配布ソースの"sample"ディレクトリに格納しています  
 An sample configuration for mod_doshelper.  
+
 ```
 LoadModule setenvif_module modules/mod_setenvif.so
 <IfModule mod_setenvif.c>
@@ -143,18 +148,19 @@ doshelperを有効にする場合は on をセットします
 記載例：DoshelperAction  on  
   
 __DoshelperRedisServer__  
-redisサーバを指定します ※ 空白区切りで複数サーバ指定  
+redisサーバを指定します ※ 空白区切りで複数のRedisサーバが指定できます  
 書式：サーバ名:ポート （サーバ名:ポート）  
 デフォルト：なし  
 記載例：DoshelperRedisServer  localhost:6379  localhost:6380  
   
 __DoshelperRedisConnectTimeout__  
 redisコネクトのタイムアウトを指定します  
-応答が遅い場合はこの時間で調整できます  
+redisの応答速度によりここで調整が可能です  
+***
 書式：秒 (空白) マイクロ秒  
 デフォルト：0.05ミリ秒  
 記述例：DoshelperRedisConnectTimeout  0  050000  
-  
+***  
 __DoshelperRedisRequirepass__  
 redis接続パスワードを指定します  
 書式：文字列  
