@@ -176,7 +176,7 @@ __DoshelperRedisDatabase__
 記述例：DoshelperRedisDatabase  0  
 ***
 
-__DoshelperIgnoreContentType__
+__DoshelperIgnoreContentType__  
 処理対象外とするコンテントタイプを指定します  
 SetEnvIfの拡張子除外と合わせて活用します  
 書式：文字列 ※ 複数指定時はパイプ（｜）文字で連結します  
@@ -203,9 +203,9 @@ __DoshelperDosWaitTime__
 デフォルト：なし  
 記述例：30秒間に同一IPから10回のリクエストで、60秒間遮断するケース  
        60 Seconds Shut-out at 10 Requests to 30 Seconds.  
-DoshelperDosCheckTime  30  
-DoshelperDosRequest    10  
-DoshelperDosWaitTime   60  
+ DoshelperDosCheckTime  30  
+ DoshelperDosRequest    10  
+ DoshelperDosWaitTime   60  
 ***
 
 __DoshelperDosCase__  
@@ -214,13 +214,13 @@ defense of the DoS of url unit.
 書式：ctime="チェックする秒" request="リクエスト回数" wtime="遮断時間（秒）"  
 デフォルト：なし  
 記述例：  
-"/foo/bar.php"に対して5秒間に3回以上のリクエストで120秒遮断するケース  
-"/foo/bar.php" is, 120 Seconds Shut-out at 3 Requests to 5 Seconds.  
-DoshelperDosCase "^/foo/bar.php" ctime="5" request="3" wtime="120"  
+ "/foo/bar.php"に対して5秒間に3回以上のリクエストで120秒遮断するケース  
+ "/foo/bar.php" is, 120 Seconds Shut-out at 3 Requests to 5 Seconds.  
+ DoshelperDosCase "^/foo/bar.php" ctime="5" request="3" wtime="120"  
   
-"/cgi-bin/hoge/"のディレクトリ配下のURLに対し、10秒間に15回以上のリクエストで5秒遮断するケース  
-"/cgi-bin/hoge/" is, 5 Seconds Shut-out at 15 Requests to 10 Seconds.  
-DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"  
+ "/cgi-bin/hoge/"のディレクトリ配下のURLに対し、10秒間に15回以上のリクエストで5秒遮断するケース  
+ "/cgi-bin/hoge/" is, 5 Seconds Shut-out at 15 Requests to 10 Seconds.  
+ DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"  
 ***
 
 ### Setting of the block pattern
@@ -252,33 +252,33 @@ IP即時遮断画面（管理画面）の利用有無を指定します
 記述例：DoshelperControlAction  on
 ***
 
-__DoshelperIpWhiteList__
-__DoshelperIpWhiteSet__
-__DoshelperIpWhiteDel__
-__DoshelperIpBlackList__
-__DoshelperIpBlackSet__
-__DoshelperIpBlackDel__
-__DoshelperControlFree__
-__DoshelperDisplayCount__
+__DoshelperIpWhiteList__  
+__DoshelperIpWhiteSet__  
+__DoshelperIpWhiteDel__  
+__DoshelperIpBlackList__  
+__DoshelperIpBlackSet__  
+__DoshelperIpBlackDel__  
+__DoshelperControlFree__  
+__DoshelperDisplayCount__  
 管理画面のURLとアクセス時に遮断適用外とさせる期間（秒）、一覧表示させる件数を指定します  
 指定したパスで管理画面にアクセスするため、既存サイトに存在しないパス かつ セキュリティ観点からもわかりにくいパスを指定してください  
 
 書式：パス名　※ ドキュメントルート以下  
 デフォルト：なし  
 記述例：  
-DoshelperIpWhiteList  "/whitelist"  
-DoshelperIpWhiteSet   "/whitelistset"  
-DoshelperIpWhiteDel   "/whitelistdelete"  
-DoshelperIpBlackList  "/blacklist"  
-DoshelperIpBlackSet   "/blacklistset"  
-DoshelperIpBlackDel   "/blacklistdelete"  
-DoshelperControlFree  60  
-DoshelperDisplayCount 100  
+ DoshelperIpWhiteList  "/whitelist"  
+ DoshelperIpWhiteSet   "/whitelistset"  
+ DoshelperIpWhiteDel   "/whitelistdelete"  
+ DoshelperIpBlackList  "/blacklist"  
+ DoshelperIpBlackSet   "/blacklistset"  
+ DoshelperIpBlackDel   "/blacklistdelete"  
+ DoshelperControlFree  60  
+ DoshelperDisplayCount 100  
 ***
 
-__DoshelperIpSetFormFilePath__
-__DoshelperIpCompleteFilePath__
-__DoshelperIpListFilePath__
+__DoshelperIpSetFormFilePath__  
+__DoshelperIpCompleteFilePath__  
+__DoshelperIpListFilePath__  
 管理画面のテンプレートファイルです  
 外部に公開されない（ドキュメントルート外）に配置し、フルパスで記述してください  
 配置したファイルとディレクトリは、apacheユーザ（またはグループ）の参照権限を付与してください  
@@ -286,9 +286,9 @@ __DoshelperIpListFilePath__
 書式：フルパス名  
 デフォルト：なし  
 記述例；  
-DoshelperIpSetFormFilePath /var/www/doshelper/control/setform.html  
-DoshelperIpCompleteFilePath /var/www/doshelper/control/complete.html  
-DoshelperIpListFilePath  /var/www/doshelper/control/list.html  
+ DoshelperIpSetFormFilePath /var/www/doshelper/control/setform.html  
+ DoshelperIpCompleteFilePath /var/www/doshelper/control/complete.html  
+ DoshelperIpListFilePath  /var/www/doshelper/control/list.html  
 ***
 
 ### Setting of the log
@@ -297,10 +297,10 @@ DoshelperIpListFilePath  /var/www/doshelper/control/list.html
 ***
 DH_DOS：DoS認定された場合、"DoSAttack"の文字列がセットされます  
 DH_CNT：リクエスト回数がセットされます  
-記述例：DoS認定時、通常のアクセス情報に加えて "DoSAttack"の文字列とリクエスト回数を”doshelper_log”として出力します  
-LogFormat  "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %D %T %p \"%{DH_DOS}e\" \"%{DH_CNT}e\"" doshelper_doslog  
-CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS  
 ***
+記述例：DoS認定時、通常のアクセス情報に加えて "DoSAttack"の文字列とリクエスト回数を”doshelper_log”として出力します  
+ LogFormat  "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %D %T %p \"%{DH_DOS}e\" \"%{DH_CNT}e\"" doshelper_doslog  
+ CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS  
 
 ```
 IP - - [07/Nov/2015:18:44:17 +0900] "GET / HTTP/1.1" 200 1160 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:31.0) Gecko/20100101 Firefox/31.0" 11475 0 80 __"DoSAttack" "11"__
