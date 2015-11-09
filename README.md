@@ -164,7 +164,10 @@ Set the on if you want to enable the doshelper.
 
 書式：on or off  
 デフォルト：off  
-記載例：DoshelperAction  on  
+記載例：  
+```
+DoshelperAction  on
+```
 ***
 
 __DoshelperRedisServer__  
@@ -173,7 +176,10 @@ Specify the redis server ※ You can specify multiple Redis server separated by 
   
 書式：サーバ名:ポート （サーバ名:ポート）  
 デフォルト：なし  
-記載例：DoshelperRedisServer  localhost:6379  localhost:6380  
+記載例：  
+```
+DoshelperRedisServer  localhost:6379  localhost:6380
+```
 ***
 
 __DoshelperRedisConnectTimeout__  
@@ -182,7 +188,10 @@ Specify a time-out of redis connect. It is adjustable according to the response 
   
 書式：秒 (空白) マイクロ秒  
 デフォルト：0.05ミリ秒  
-記述例：DoshelperRedisConnectTimeout  0  050000  
+記述例：  
+```
+DoshelperRedisConnectTimeout  0  050000
+```
 ***
 
 __DoshelperRedisRequirepass__  
@@ -191,7 +200,10 @@ Specify the redis connection password.
   
 書式：文字列  
 デフォルト：なし  
-記述例：DoshelperRedisRequirepass  tiger  
+記述例：  
+```
+DoshelperRedisRequirepass  tiger
+```
 ***
 
 __DoshelperRedisDatabase__  
@@ -200,7 +212,10 @@ Specify a numeric value database area to be used by 16 of the database area (def
   
 書式：数値（0〜15）  
 デフォルト：0  
-記述例：DoshelperRedisDatabase  0  
+記述例：  
+```
+DoshelperRedisDatabase  0
+```
 ***
 
 __DoshelperIgnoreContentType__  
@@ -209,7 +224,10 @@ Specify the content type to be excluded.
   
 書式：文字列 ※ 複数指定時はパイプ（｜）文字で連結します  
 デフォルト：なし  
-記述例：DoshelperIgnoreContentType  (javascript|image|css|flash|x-font-ttf)  
+記述例：  
+```
+DoshelperIgnoreContentType  (javascript|image|css|flash|x-font-ttf)
+```
 ***
 
 ### Setting of the DoS pattern
@@ -226,7 +244,10 @@ Specify the on if that apply to the entire site.
   
 書式：on or off  
 デフォルト：off  
-記述例：DoshelperCommmonDosAction  on  
+記述例：  
+```
+DoshelperCommmonDosAction  on
+```
 ***
 
 __DoshelperDosCheckTime__  
@@ -237,11 +258,14 @@ Specify the threshold that applies to the entire site.
   
 書式：数値  
 デフォルト：なし  
-記述例：30秒間に同一IPから10回のリクエストで、60秒間遮断するケース  
-       60 Seconds Shut-out at 10 Requests to 30 Seconds.  
- DoshelperDosCheckTime  30  
- DoshelperDosRequest    10  
- DoshelperDosWaitTime   60  
+記述例：  
+30秒間に同一IPから10回のリクエストで、60秒間遮断するケース  
+60 Seconds Shut-out at 10 Requests to 30 Seconds.  
+```
+DoshelperDosCheckTime  30
+DoshelperDosRequest    10
+DoshelperDosWaitTime   60
+```
 ***
 
 #### Apply to the URL
@@ -254,16 +278,18 @@ defense of the DoS of url unit.
 
 書式：ctime="チェックする秒" request="リクエスト回数" wtime="遮断時間（秒）"  
 デフォルト：なし  
-記述例：  
- "/foo/bar.php"に対して5秒間に3回以上のリクエストで120秒遮断するケース  
- "/foo/bar.php" is, 120 Seconds Shut-out at 3 Requests to 5 Seconds.  
-
-DoshelperDosCase "^/foo/bar.php" ctime="5" request="3" wtime="120"  
+記述例：
+"/foo/bar.php"に対して5秒間に3回以上のリクエストで120秒遮断するケース  
+"/foo/bar.php" is, 120 Seconds Shut-out at 3 Requests to 5 Seconds.  
+```
+DoshelperDosCase "^/foo/bar.php" ctime="5" request="3" wtime="120"
+```
   
- "/cgi-bin/hoge/"のディレクトリ配下のURLに対し、10秒間に15回以上のリクエストで5秒遮断するケース  
- "/cgi-bin/hoge/" is, 5 Seconds Shut-out at 15 Requests to 10 Seconds.  
-
-DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"  
+"/cgi-bin/hoge/"のディレクトリ配下のURLに対し、10秒間に15回以上のリクエストで5秒遮断するケース  
+"/cgi-bin/hoge/" is, 5 Seconds Shut-out at 15 Requests to 10 Seconds.  
+```
+DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"
+```
 ***
 
 ### Setting of the block pattern
@@ -277,33 +303,42 @@ Specify a response code at the time of cut-off.
   
 書式：レスポンスコード  
 デフォルト：なし  
-記述例：DoshelperReturnType  403  
+記述例：  
+```
+DoshelperReturnType  403
+```
 ***
 
 __DoshelperDosFilePath__  
 事前に用意したHTMLを遮断時に表示させます（DoshelperReturnTypeと併用はできません）  
-配置したファイルとディレクトリは、apacheユーザ（またはグループ）の参照権限を付与してください  
+apacheユーザ（またはグループ）の参照権限を付与してください  
 Display the HTML at the time of cut-off.  
 "DoshelperReturnType" and combined it can not.  
 Please give the reference authority in apache.  
   
 書式：フルパス名  
 デフォルト：なし  
-記述例：DoshelperDosFilePath  /var/www/doshelper/control/dos.html  
+記述例：  
+```
+DoshelperDosFilePath  /var/www/doshelper/control/dos.html
+```
 ***
 
 ### Setting of the ip control
-現在のアクセス状況の確認や、特定のIPを無条件遮断ができる管理画面の指定です
+現在のアクセス状況の確認や、特定のIPを無条件遮断ができる管理画面の指定です  
 Specify a management screen.  
 Can be IP blocking and confirmed of access status.  
   
-__DoshelperControlAction__
+__DoshelperControlAction__  
 IP即時遮断画面の利用有無を指定します  
 Specify the use of IP immediate cut-off screen.  
   
-書式：on or off
-デフォルト：off
-記述例：DoshelperControlAction  on
+書式：on or off  
+デフォルト：off  
+記述例：  
+```
+DoshelperControlAction  on
+```
 ***
 
 __DoshelperIpWhiteList__  
@@ -315,19 +350,21 @@ __DoshelperIpBlackDel__
 __DoshelperControlFree__  
 __DoshelperDisplayCount__  
 管理画面のURLとアクセス時に遮断適用外とさせる期間（秒）、一覧表示させる件数を指定します  
-指定したパスで管理画面にアクセスするため、既存サイトに存在しないパス かつ セキュリティ観点からもわかりにくいパスを指定してください  
+ここで指定したパスで管理画面にアクセスするので、存在しない かつ セキュリティ観点からもわかりにくいパスを指定してください  
 
 書式：パス名　※ ドキュメントルート以下  
 デフォルト：なし  
 記述例：  
- DoshelperIpWhiteList  "/whitelist"  
- DoshelperIpWhiteSet   "/whitelistset"  
- DoshelperIpWhiteDel   "/whitelistdelete"  
- DoshelperIpBlackList  "/blacklist"  
- DoshelperIpBlackSet   "/blacklistset"  
- DoshelperIpBlackDel   "/blacklistdelete"  
- DoshelperControlFree  60  
- DoshelperDisplayCount 100  
+```
+DoshelperIpWhiteList  "/whitelist"
+DoshelperIpWhiteSet   "/whitelistset"
+DoshelperIpWhiteDel   "/whitelistdelete"
+DoshelperIpBlackList  "/blacklist"
+DoshelperIpBlackSet   "/blacklistset"
+DoshelperIpBlackDel   "/blacklistdelete"
+DoshelperControlFree  60
+DoshelperDisplayCount 100
+```
 ***
 
 __DoshelperIpSetFormFilePath__  
@@ -342,9 +379,11 @@ apacheユーザ（またはグループ）の参照権限を付与してくだ�
 書式：フルパス名  
 デフォルト：なし  
 記述例；  
- DoshelperIpSetFormFilePath /var/www/doshelper/control/setform.html  
- DoshelperIpCompleteFilePath /var/www/doshelper/control/complete.html  
- DoshelperIpListFilePath  /var/www/doshelper/control/list.html  
+```
+DoshelperIpSetFormFilePath /var/www/doshelper/control/setform.html
+DoshelperIpCompleteFilePath /var/www/doshelper/control/complete.html
+DoshelperIpListFilePath  /var/www/doshelper/control/list.html
+```
 ***
 
 ### Setting of the log
@@ -354,10 +393,13 @@ apacheユーザ（またはグループ）の参照権限を付与してくだ�
 DH_DOS：DoS認定された場合、"DoSAttack"の文字列がセットされます  
 DH_CNT：リクエスト回数がセットされます  
 ***
-記述例：DoS認定時、通常のアクセス情報に加えて "DoSAttack"の文字列とリクエスト回数を”doshelper_log”として出力します  
+記述例：  
+DoS認定時、通常のアクセス情報に加えて "DoSAttack"の文字列とリクエスト回数を”doshelper_log”として出力します  
+```
  LogFormat  "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %D %T %p \"%{DH_DOS}e\" \"%{DH_CNT}e\"" doshelper_doslog  
  CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS  
-
+```
+出力例：  
 ```
 IP - - [07/Nov/2015:18:44:17 +0900] "GET / HTTP/1.1" 200 1160 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:31.0) Gecko/20100101 Firefox/31.0" 11475 0 80 __"DoSAttack" "11"__
 IP - - [07/Nov/2015:18:44:17 +0900] "GET / HTTP/1.1" 200 1160 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:31.0) Gecko/20100101 Firefox/31.0" 12060 0 80 __"DoSAttack" "12"__
