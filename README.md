@@ -4,31 +4,44 @@ apache module that protects a 'distributed web server' from DoS attack
 
 ## Description
 アクセス数が一定の閾値を超えた場合、IP単位で自動的にアクセスを遮断します  
-アクセス管理は共有メモリ方式ではなく Redis を採用しています  
-よって複数の分散ウェブサーバ環境で急にサーバを増減しても閾値を見直す必要がありません  
-なお Redis に問題が生じた場合は、すべてのアクセスをスルーする仕組みなので万一の場合も安心してご利用いただけます  
+アクセス管理は Redis を採用しています  
+共有メモリ方式では無いため複数のウェブサーバを配置する分散環境でもアクセス状態を一元管理するので、急なサーバ増減でも閾値を見直す必要がありません  
+なお Redis に問題が生じた場合、全アクセスをスルーする仕組みなので万一の場合も安心してご利用いただけます  
+If the number of access has exceeded a certain threshold, it will automatically stop by IP access management that employs a Redis.  
+  
+This is not a shared memory system.  
+Since centralized management of access state in a distributed web server environment, there is no need to review the threshold even in steep increase or decrease server.  
+  
+If redis are experiencing problems, because to allow all access, you can use it with confidence even.  
 
 ## Features
 - 複数のウェブサーバでアクセス情報を一元管理  
+  The centralized management of access information by multiple web server.  
 - 遮断結果のログ出力  
+  Blocking results are error log output.  
 - IP単位で即時遮断  
+  Immediately shut off by the IP input.
 
-ウェブサーバを追加しても閾値の見直しは不要です  
 ログ出力結果から攻撃を検知し、攻撃者のIPを恒久的に遮断できます  
 その際の即時IP遮断はブラウザからウェブサーバのリスタート無しで複数サーバに一度にセットできます  
 このようにサイト運用の効率化・軽減化を目的としています  
+You can from the browser permanently block the attacker's IP Address.  
+Restart of the web server is not required.  
+It is the purpose in efficiency of site operations.  
 
 ## Requirement
 導入に必要な要件です  
 - [hiredis](https://github.com/redis/hiredis)
 - apxs
 - [Redis](http://redis.io/)  Redis version >= 2.4.0.  
+- apache 2.0 - 2.4 prefork
 
 ## Preparation
 ビルドにあたり事前のセットアップが必要です  
 
 ### hiredis
-Redis接続ライブラリです
+Redis接続ライブラリです  
+This is Redis connection library.
 ```
 $ wget -O hiredis.zip https://github.com/redis/hiredis/archive/master.zip
 $ unzip hiredis.zip
@@ -38,8 +51,9 @@ $ sudo make install
 ```
 
 ### apxs
-apacheモジュールのコンパイル・リンクに必要なツールです
-
+apacheモジュールのコンパイル・リンクに必要なツールです  
+It is a tool necessary to compile and link the apache module  
+  
 _[CentOS/Fedora]_
 ```
 $ sudo yum install httpd-devel
@@ -54,8 +68,9 @@ $ sudo apt-get install apache2-prefork-dev
 doshelper動作時に必要です  
 専用サーバ導入が望ましいのですが、DBサーバやウェブサーバへ同居でも構いません  
 なおDMZ（ウェブサーバ同居）配置の場合は、IP制限などのセキュア対策が必要なため、後述のAppendix「Redis設定」を参照してください  
+[Redis](http://redis.io/) is an open source (BSD licensed), in-memory data structure store, used as database, cache and message broker.  
 
-[redisダウンロード](http://redis.io/download)
+[Redisのダウンロード](http://redis.io/download)
 ```
 $ wget http://download.redis.io/releases/redis-2.8.23.tar.gz
 $ tar xzf redis-2.8.*.tar.gz
@@ -140,9 +155,13 @@ CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS
 ```
 
 各設定項目の詳細となります  
-  
+It becomes the details of each configuration item.  
+
+***
 __DoshelperAction__  
 doshelperを有効にする場合は on をセットします  
+Set the on if you want to enable the doshelper.  
+
 書式：on or off  
 デフォルト：off  
 記載例：DoshelperAction  on  
@@ -150,6 +169,8 @@ doshelperを有効にする場合は on をセットします
 
 __DoshelperRedisServer__  
 redisサーバを指定します ※ 空白区切りで複数のRedisサーバが指定できます  
+Specify the redis server ※ You can specify multiple Redis server separated by spaces.  
+  
 書式：サーバ名:ポート （サーバ名:ポート）  
 デフォルト：なし  
 記載例：DoshelperRedisServer  localhost:6379  localhost:6380  
@@ -157,6 +178,8 @@ redisサーバを指定します ※ 空白区切りで複数のRedisサーバ�
 
 __DoshelperRedisConnectTimeout__  
 redisコネクトのタイムアウトを指定します。 応答速度にあわせ調整可能です  
+Specify a time-out of redis connect. It is adjustable according to the response speed.  
+  
 書式：秒 (空白) マイクロ秒  
 デフォルト：0.05ミリ秒  
 記述例：DoshelperRedisConnectTimeout  0  050000  
@@ -164,6 +187,8 @@ redisコネクトのタイムアウトを指定します。 応答速度にあ�
 
 __DoshelperRedisRequirepass__  
 redis接続パスワードを指定します  
+Specify the redis connection password.  
+  
 書式：文字列  
 デフォルト：なし  
 記述例：DoshelperRedisRequirepass  tiger  
@@ -171,6 +196,8 @@ redis接続パスワードを指定します
 
 __DoshelperRedisDatabase__  
 16個のデータベース領域（デフォルト）で利用するデータベース領域を数値で指定します  
+Specify a numeric value database area to be used by 16 of the database area (default).  
+  
 書式：数値（0〜15）  
 デフォルト：0  
 記述例：DoshelperRedisDatabase  0  
@@ -178,7 +205,8 @@ __DoshelperRedisDatabase__
 
 __DoshelperIgnoreContentType__  
 処理対象外とするコンテントタイプを指定します  
-SetEnvIfの拡張子除外と合わせて活用します  
+Specify the content type to be excluded.  
+  
 書式：文字列 ※ 複数指定時はパイプ（｜）文字で連結します  
 デフォルト：なし  
 記述例：DoshelperIgnoreContentType  (javascript|image|css|flash|x-font-ttf)  
@@ -186,10 +214,16 @@ SetEnvIfの拡張子除外と合わせて活用します
 
 ### Setting of the DoS pattern
 DoS攻撃とみなす閾値を設定します  
-サイト全体とURL単位の2パターンで設定ができます  
+Sets a threshold regarded as the DoS attack.  
 
+#### Apply to the entire site
+サイト全体に適用する  
+  
+***
 __DoshelperCommmonDosAction__  
-サイト全体に適用する閾値を利用する場合 on を指定します  
+サイト全体に適用する場合 on を指定します  
+Specify the on if that apply to the entire site.  
+  
 書式：on or off  
 デフォルト：off  
 記述例：DoshelperCommmonDosAction  on  
@@ -199,6 +233,8 @@ __DoshelperDosCheckTime__
 __DoshelperDosRequest__  
 __DoshelperDosWaitTime__  
 サイト全体に適用する遮断の閾値を設定します  
+Specify the threshold that applies to the entire site.  
+  
 書式：数値  
 デフォルト：なし  
 記述例：30秒間に同一IPから10回のリクエストで、60秒間遮断するケース  
@@ -208,45 +244,63 @@ __DoshelperDosWaitTime__
  DoshelperDosWaitTime   60  
 ***
 
+#### Apply to the URL
+URL単位で適用する  
+
+***
 __DoshelperDosCase__  
 URL単位で遮断するケースで利用します  
 defense of the DoS of url unit.  
+
 書式：ctime="チェックする秒" request="リクエスト回数" wtime="遮断時間（秒）"  
 デフォルト：なし  
 記述例：  
  "/foo/bar.php"に対して5秒間に3回以上のリクエストで120秒遮断するケース  
  "/foo/bar.php" is, 120 Seconds Shut-out at 3 Requests to 5 Seconds.  
- DoshelperDosCase "^/foo/bar.php" ctime="5" request="3" wtime="120"  
+
+DoshelperDosCase "^/foo/bar.php" ctime="5" request="3" wtime="120"  
   
  "/cgi-bin/hoge/"のディレクトリ配下のURLに対し、10秒間に15回以上のリクエストで5秒遮断するケース  
  "/cgi-bin/hoge/" is, 5 Seconds Shut-out at 15 Requests to 10 Seconds.  
- DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"  
+
+DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"  
 ***
 
 ### Setting of the block pattern
 レスポンスコード返却、または遮断画面表示の選択が可能です  
-please select the "return the specific response code" or "cut-off screen".  
+Select the "return the specific response code" or "cut-off screen".  
   
+***
 __DoshelperReturnType__
 遮断時のレスポンスコードを指定します  
+Specify a response code at the time of cut-off.  
+  
 書式：レスポンスコード  
 デフォルト：なし  
 記述例：DoshelperReturnType  403  
 ***
 
 __DoshelperDosFilePath__  
-事前に用意したHTMLを遮断時に表示させます（DoshelperReturnTypeとの併用はできません）  
+事前に用意したHTMLを遮断時に表示させます（DoshelperReturnTypeと併用はできません）  
 配置したファイルとディレクトリは、apacheユーザ（またはグループ）の参照権限を付与してください  
+Display the HTML at the time of cut-off.  
+"DoshelperReturnType" and combined it can not.  
+Please give the reference authority in apache.  
+  
 書式：フルパス名  
 デフォルト：なし  
 記述例：DoshelperDosFilePath  /var/www/doshelper/control/dos.html  
 ***
 
 ### Setting of the ip control
-現在のアクセス状況の確認や、特定のIPを無条件遮断ができる管理画面の指定です  
-
+現在のアクセス状況の確認や、特定のIPを無条件遮断ができる管理画面の指定です
+Specify a management screen.  
+Can be IP blocking and confirmed of access status.  
+  
 __DoshelperControlAction__
-IP即時遮断画面（管理画面）の利用有無を指定します  
+IP即時遮断画面の利用有無を指定します  
+Specify the use of IP immediate cut-off screen.  
+  
 書式：on or off
 デフォルト：off
 記述例：DoshelperControlAction  on
@@ -280,8 +334,10 @@ __DoshelperIpSetFormFilePath__
 __DoshelperIpCompleteFilePath__  
 __DoshelperIpListFilePath__  
 管理画面のテンプレートファイルです  
+This is the template file management screen.  
+
 外部に公開されない（ドキュメントルート外）に配置し、フルパスで記述してください  
-配置したファイルとディレクトリは、apacheユーザ（またはグループ）の参照権限を付与してください  
+apacheユーザ（またはグループ）の参照権限を付与してください  
 
 書式：フルパス名  
 デフォルト：なし  
