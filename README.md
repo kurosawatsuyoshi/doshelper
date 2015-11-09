@@ -278,14 +278,14 @@ defense of the DoS of url unit.
 
 書式：ctime="チェックする秒" request="リクエスト回数" wtime="遮断時間（秒）"  
 デフォルト：なし  
-記述例：
+記述例：  
 "/foo/bar.php"に対して5秒間に3回以上のリクエストで120秒遮断するケース  
 "/foo/bar.php" is, 120 Seconds Shut-out at 3 Requests to 5 Seconds.  
 ```
 DoshelperDosCase "^/foo/bar.php" ctime="5" request="3" wtime="120"
 ```
   
-"/cgi-bin/hoge/"のディレクトリ配下のURLに対し、10秒間に15回以上のリクエストで5秒遮断するケース  
+"/cgi-bin/hoge/"のディレクトリ配下に対し、10秒間に15回以上のリクエストで5秒遮断するケース  
 "/cgi-bin/hoge/" is, 5 Seconds Shut-out at 15 Requests to 10 Seconds.  
 ```
 DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"
@@ -297,7 +297,7 @@ DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"
 Select the "return the specific response code" or "cut-off screen".  
   
 ***
-__DoshelperReturnType__
+__DoshelperReturnType__  
 遮断時のレスポンスコードを指定します  
 Specify a response code at the time of cut-off.  
   
@@ -349,6 +349,7 @@ __DoshelperIpBlackSet__
 __DoshelperIpBlackDel__  
 __DoshelperControlFree__  
 __DoshelperDisplayCount__  
+  
 管理画面のURLとアクセス時に遮断適用外とさせる期間（秒）、一覧表示させる件数を指定します  
 ここで指定したパスで管理画面にアクセスするので、存在しない かつ セキュリティ観点からもわかりにくいパスを指定してください  
 
@@ -365,11 +366,16 @@ DoshelperIpBlackDel   "/blacklistdelete"
 DoshelperControlFree  60
 DoshelperDisplayCount 100
 ```
+管理画面のアクセス方法  
+```
+http://example.com/blacklist
+```
 ***
 
 __DoshelperIpSetFormFilePath__  
 __DoshelperIpCompleteFilePath__  
 __DoshelperIpListFilePath__  
+  
 管理画面のテンプレートファイルです  
 This is the template file management screen.  
 
@@ -388,13 +394,12 @@ DoshelperIpListFilePath  /var/www/doshelper/control/list.html
 
 ### Setting of the log
 以下の環境変数に遮断情報がセットされます  
-ログ出力で ¥%{***}e のパラメータで出力することができます  
+DoS認定時、通常のアクセス情報に加えて "DoSAttack"の文字列とリクエスト回数を”doshelper_log”として出力します  
 ***
 DH_DOS：DoS認定された場合、"DoSAttack"の文字列がセットされます  
 DH_CNT：リクエスト回数がセットされます  
 ***
 記述例：  
-DoS認定時、通常のアクセス情報に加えて "DoSAttack"の文字列とリクエスト回数を”doshelper_log”として出力します  
 ```
  LogFormat  "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %D %T %p \"%{DH_DOS}e\" \"%{DH_CNT}e\"" doshelper_doslog  
  CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS  
