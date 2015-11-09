@@ -23,8 +23,8 @@ If redis are experiencing problems, because to allow all access, you can use it 
   Immediately shut off by the IP input.
 
 ログ出力結果から攻撃を検知し、攻撃者のIPを恒久的に遮断できます  
-その際の即時IP遮断はブラウザからウェブサーバのリスタート無しで複数サーバに一度にセットできます  
-このようにサイト運用の効率化・軽減化を目的としています  
+複数のウェブサーバのリスタート無しでブラウザから即時にIP遮断できます  
+サイト運用の効率化・軽減化を目的としています  
 You can from the browser permanently block the attacker's IP Address.  
 Restart of the web server is not required.  
 It is the purpose in efficiency of site operations.  
@@ -34,10 +34,10 @@ It is the purpose in efficiency of site operations.
 - [hiredis](https://github.com/redis/hiredis)
 - apxs
 - [Redis](http://redis.io/)  Redis version >= 2.4.0.  
-- apache 2.0 - 2.4 prefork
+- apache 2.0 - 2.4 (prefork mode)
 
 ## Preparation
-ビルドにあたり事前のセットアップが必要です  
+ビルドにあたっての事前要件です  
 
 ### hiredis
 Redis接続ライブラリです  
