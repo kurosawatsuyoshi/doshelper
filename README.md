@@ -5,7 +5,8 @@ apache module that protects a 'distributed web server' from DoS attack
 
 ## Description
 アクセス数が一定の閾値を超えた場合、IP単位で自動的にアクセスを遮断します  
-  
+iptables の制御ではサーバ全体の設定となってしまったり、ロードバランサの設定が頻繁に変更できないケースで活用します  
+
 アクセス管理は Redis を採用しています  
 共有メモリ方式では無いため複数のウェブサーバを配置する分散環境でもアクセス状態を一元管理するので、急なサーバ増減でも閾値を見直す必要がありません  
 なお Redis に問題が生じた場合、全アクセスをスルーする仕組みなので万一の場合も安心してご利用いただけます  
@@ -466,14 +467,4 @@ sudo yum install --enablerepo=epel hiredis hiredis-devel
 ```
 
 ## Redis設定
-- ユーザとグループの作成
-- 設定ファイルの編集
-- 自動起動設定
-
-Redis ユーザとグループの作成
-```
-$ sudo groupadd redis
-$ sudo useradd -s /sbin/nologin -M -g redis redis
-```
-
-以降、記述予定（2015/11/8)
+[こちらを参照してください](https://github.com/kurosawatsuyoshi/doshelper/wiki/redis-setup)
