@@ -101,6 +101,21 @@ $ make
 $ sudo make install
 ```
 
+apache 起動時にエラーが発生する場合  
+```
+doshelper.conf: Cannot load /etc/httpd/modules/mod_doshelper.so into server: libhiredis.so.0.13: cannot open shared object file: No such file or directory
+```
+makeファイルの LIBS に hiredis.so の格納パスを指定して、再度インストールしてください
+```
+$ vi Makefile
+#LIBS=-lhiredis
+LIBS=-L/usr/local/lib -lhiredis
+```
+```
+$ make
+$ sudo make install
+```
+
 ## Configuration
 設定ファイルのサンプルです  
 配布ソースの"sample"ディレクトリに格納しています  
