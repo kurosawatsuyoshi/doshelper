@@ -126,12 +126,14 @@ $ sudo vi /etc/ld.so.conf.d/doshelper.conf
 /usr/local/lib
 $ sudo ldconfig
 ```
+  
 ##### 回避策２　LD_LIBRARY_PATH を利用する
 apache 起動スクリプトに 環境変数を利用してライブラリ参照パスをセットします  
 ```
 $ sudo vi /etc/init.d/httpd
 export LD_LIBRARY_PATH=/usr/local/lib
 ```
+  
 ##### 回避策３　静的ライブラリ（libhiredis.a）として取り込む
 doshelper に hiredisライブラリを組み込んで一体化します  
 こちらのケースは、hiredis ライブラリを気にする必要がありません  
@@ -145,6 +147,7 @@ LIBS=/usr/local/lib/libhiredis.a
 $ make
 $ sudo make install
 ```
+  
 ##### 回避策４　hiredisのインストール先変更
 hiredis のインストールを、引数に PREFIX をつけて格納パスを指示します  
 すでに動的ライブラリの参照パスが設定されている場合は、こちらでもOKです  
@@ -152,7 +155,7 @@ hiredis のインストールを、引数に PREFIX をつけて格納パスを�
 $ cd hiredis-master/
 $ make install PREFIX=/lib64
 ```
-  
+
 ##### SELinux 利用時の注意点
 SELinux 利用時は、上記対策に加え セキュリティコンテキストの再割当が必要です  
 以下のように restorecon コマンドで、apache サービスからライブラリが参照できるようにしてください  
@@ -364,10 +367,6 @@ DoshelperDosWaitTime   60
 ```
 ***
 
-##### Apply to the URL
-URL単位で適用する  
-
-***
 __DoshelperDosCase__  
 URL単位で遮断するケースで利用します  
 defense of the DoS of url unit.  
@@ -389,7 +388,7 @@ DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"
 ***
   
   
-### Setting of the block pattern
+## Setting of the block pattern
 レスポンスコード返却、または遮断画面表示の選択が可能です  
 Select the "return the specific response code" or "cut-off screen".  
   
@@ -420,7 +419,7 @@ DoshelperDosFilePath  /var/www/doshelper/control/dos.html
 ***
   
   
-### Setting of the ip control
+## Setting of the ip control
 現在のアクセス状況の確認や、特定のIPを無条件遮断ができる管理画面の指定です  
 Specify a management screen. Can be IP blocking and confirmed of access status.  
   
