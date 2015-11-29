@@ -126,14 +126,15 @@ $ sudo vi /etc/ld.so.conf.d/doshelper.conf
 /usr/local/lib
 $ sudo ldconfig
 ```
-### 回避策２ LD_LIBRARY_PATH を利用する
+### 回避策２　LD_LIBRARY_PATH を利用する
 apache 起動スクリプトに 環境変数を利用してライブラリ参照パスをセットします  
 ```
 $ sudo vi /etc/init.d/httpd
 export LD_LIBRARY_PATH=/usr/local/lib
 ```
-### 回避策３ libhiredis.a 静的ライブラリ取り込み
-doshelper に hiredisライブラリを取り込みます  
+### 回避策３　静的ライブラリ（libhiredis.a）として取り込む
+doshelper に hiredisライブラリを組み込んで一体化します  
+こちらのケースは、hiredis ライブラリを気にする必要がありません  
 複数のウェブサーバにライブラリ導入がたいへんな場合は、こちらを選択してください  
 ```
 $ cd doshelper-master
@@ -144,7 +145,7 @@ LIBS=/usr/local/lib/libhiredis.a
 $ make
 $ sudo make install
 ```
-### 回避策４ hiredisのインストール先変更
+### 回避策４　hiredisのインストール先変更
 hiredis のインストールを、引数に PREFIX をつけて格納パスを指示します  
 すでに動的ライブラリの参照パスが設定されている場合は、こちらでもOKです  
 ```
