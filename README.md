@@ -9,6 +9,7 @@ iptables の制御ではサーバ全体の設定となってしまったり、�
 
 アクセス管理は Redis を採用しています  
 共有メモリ方式では無いため複数のウェブサーバを配置する分散環境でもアクセス状態を一元管理するので、急なサーバ増減でも閾値を見直す必要がありません  
+  
 なお Redis に問題が生じた場合、全アクセスをスルーする仕組みなので万一の場合も安心してご利用いただけます  
   
 また閾値はURL単位でもをセット可能なので、先着順の受付機能やタイムセールなど、アクセスの集中が予測される機能に対して事前にセットしておくことで、サーバ高負荷によるサービス停止を回避できます  
@@ -33,7 +34,6 @@ If redis are experiencing problems, because to allow all access, you can use it 
 ログ出力結果から攻撃を検知し、攻撃者のIPを恒久的に遮断できます  
 複数のウェブサーバのリスタート無しでブラウザから即時にIP遮断できます  
 サイト運用の効率化・軽減化を目的としています  
-  
 You can from the browser permanently block the attacker's IP Address.  
 Restart of the web server is not required.  
 It is the purpose in efficiency of site operations.  
@@ -51,9 +51,7 @@ It is the purpose in efficiency of site operations.
 
 #### hiredis
 redis接続ライブラリです  
-  
 This is redis connection library.  
-  
 ```
 $ wget -O hiredis.zip https://github.com/redis/hiredis/archive/master.zip
 $ unzip hiredis.zip
@@ -64,7 +62,6 @@ $ sudo make install
 
 #### apxs
 apacheモジュールのコンパイル・リンクに必要なツールです  
-  
 It is a tool necessary to compile and link the apache module  
   
 _[CentOS/Fedora]_
