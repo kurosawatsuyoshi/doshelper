@@ -126,7 +126,8 @@ $ sudo vi /etc/ld.so.conf.d/doshelper.conf
 /usr/local/lib
 $ sudo ldconfig
 ```
-  
+
+
 ##### 回避策２　LD_LIBRARY_PATH を利用する
 apache 起動スクリプトに 環境変数を利用してライブラリ参照パスをセットします  
 ```
