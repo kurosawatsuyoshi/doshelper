@@ -100,25 +100,66 @@ $ ./configure
 $ make
 $ sudo make install
 ```
-
+  
 apache 起動時にエラーが発生する場合  
 ```
 doshelper.conf: Cannot load /etc/httpd/modules/mod_doshelper.so into server: libhiredis.so.0.13: cannot open shared object file: No such file or directory
 ```
-makeファイルの LIBS に hiredis.so の格納パスを指定して、再度インストールしてください
+動的ライブラリ(libhiredis.so)が見つからない場合に発生します  
+動的ライブラリが格納されている場所にパスとおす(またはパスがとおる場所に配置)、もしくは静的ライブラリとして取り込むことで回避します  
+  
+まずは doshelper を ldd コマンドで利用して確認します  
 ```
+$ ldd .libs/mod_doshelper.so 
+	linux-vdso.so.1 =>  (0x00007ffc887a9000)
+	libhiredis.so.0.13 => not found
+	libc.so.6 => /lib64/libc.so.6 (0x00007fe7f931e000)
+	/lib64/ld-linux-x86-64.so.2 (0x000000356ee00000)
+```
+上記のように libhiredis.so のパスが見つからず not found  となっています  
+  
+以下は /usr/local/lib を参照パスとして指定する例です  
+### 回避策1) ldconfig を利用する
+システムに動的ライブラリの参照パスを指示します  
+libhiredis.so を配置したパスに適宜変更してください  
+なお保存後は ldconfig を実行し、システムに反映を指示します  
+```
+$ sudo vi /etc/ld.so.conf.d/doshelper.conf
+/usr/local/lib
+$ sudo ldconfig
+```
+###2) LD_LIBRARY_PATH を利用する
+apache 起動スクリプトに 環境変数（LD_LIBRARY_PATH）に参照パスをセットします  
+```
+$ sudo vi /etc/init.d/httpd
+export LD_LIBRARY_PATH=/usr/local/lib
+```
+###3) libhiredis.a 静的ライブラリ取り込み
+doshelper に hiredisライブラリを取り込みます  
+複数のウェブサーバにライブラリ導入がたいへんな場合は、こちらを選択も検討してください  
+ただライブラリのバージョンアップは、doshelper のリコンパイルと再配置が必要となります  
+```
+$ cd doshelper-master
 $ vi Makefile
 #LIBS=-lhiredis
-LIBS=-L/usr/local/lib -lhiredis
-```
-```
+LIBS=/usr/local/lib/libhiredis.a
+
 $ make
 $ sudo make install
 ```
-
+###4) hiredisのインストール先変更
+すでに設定されている動的ライブラリ参照パスに hiredis ライブラリをインストールします  
+hiredis のインストール時、引数に PREFIX をつけて格納パスを指示します  
+```
+$ cd hiredis-master/
+$ make install PREFIX=/lib64
+```
+  
+  
 ## Configuration
 設定ファイルのサンプルです  
-配布ソースの"sample"ディレクトリに格納しています  
+配布しているソースの"sample"ディレクトリに doshelper.conf として格納しています  
+以下を httpd.conf に記載（もしくは conf.d 配下に配置し Include）することで doshelper を利用することが可能となります  
   
 An sample configuration for mod_doshelper.  
 
@@ -185,9 +226,17 @@ CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS
 ```
 
 各設定項目の詳細となります  
+なお 環境変数 DOSHELPER_IGNORE をセットすることで、doshelper の処理から除外することができます  
+サンプルの設定ファイルでは setenvif モジュールを利用して
+-- 携帯端末
+-- 静的コンテンツ（拡張子が、htm|html|js|css|gif|jpg|png）  
+-- ローカルからのアクセス
+-- 指定したURL
+を処理対象外とする例を記述していますので、適宜変更してください  
   
 It becomes the details of each configuration item.  
-  
+By setting the environment variable "DOSHELPER_IGNORE", can be excluded from the process of doshelper.  
+    
 ***
 __DoshelperAction__  
 doshelperを有効にする場合は on をセットします  
