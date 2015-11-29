@@ -153,6 +153,23 @@ $ cd hiredis-master/
 $ make install PREFIX=/lib64
 ```
   
+なお SELinux 利用時は、上記対策に加え セキュリティコンテキストの再割当が必要です  
+以下のように restorecon コマンドで、apache サービスが参照できるようにしてください  
+```
+$ ls -lZ /usr/local/lib
+-rw-rw-r--. coco coco unconfined_u:object_r:user_home_t:s0 libhiredis.a
+lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so -> libhiredis.so.0.13
+-rwxrwxr-x. coco coco unconfined_u:object_r:user_home_t:s0 libhiredis.so.0.13
+drwxr-xr-x. root root unconfined_u:object_r:lib_t:s0   pkgconfig
+
+$ sudo restorecon -RF /usr/local/lib
+
+$ ls -lZ /usr/local/lib
+-rw-rw-r--. coco coco system_u:object_r:lib_t:s0       libhiredis.a
+lrwxrwxrwx. root root system_u:object_r:lib_t:s0       libhiredis.so -> libhiredis.so.0.13
+-rwxrwxr-x. coco coco system_u:object_r:lib_t:s0       libhiredis.so.0.13
+drwxr-xr-x. root root system_u:object_r:lib_t:s0       pkgconfig
+```
   
 ## Configuration
 設定ファイルのサンプルです  
