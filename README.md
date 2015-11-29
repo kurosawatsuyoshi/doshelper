@@ -101,14 +101,12 @@ $ make
 $ sudo make install
 ```
   
-apache 起動時にエラーが発生する場合  
+#### doshelper 導入後、apache 起動でエラーが発生するケース  
+動的ライブラリ(libhiredis.so)がシステムから見つからない場合、エラーが発生します  
 ```
 doshelper.conf: Cannot load /etc/httpd/modules/mod_doshelper.so into server: libhiredis.so.0.13: cannot open shared object file: No such file or directory
 ```
-動的ライブラリ(libhiredis.so)が見つからない場合に発生します  
-動的ライブラリが格納されている場所にパスとおす(またはパスがとおる場所に配置)、もしくは静的ライブラリとして取り込むことで回避します  
-  
-まずは doshelper を ldd コマンドで利用して確認します  
+doshelper を ldd コマンドで確認すると、libhiredis.so のパスが見つからず not found  となっていることが確認できます  
 ```
 $ ldd .libs/mod_doshelper.so 
 	linux-vdso.so.1 =>  (0x00007ffc887a9000)
@@ -116,28 +114,27 @@ $ ldd .libs/mod_doshelper.so
 	libc.so.6 => /lib64/libc.so.6 (0x00007fe7f931e000)
 	/lib64/ld-linux-x86-64.so.2 (0x000000356ee00000)
 ```
-上記のように libhiredis.so のパスが見つからず not found  となっています  
   
-以下は /usr/local/lib を参照パスとして指定する例です  
-### 回避策1) ldconfig を利用する
-システムに動的ライブラリの参照パスを指示します  
-libhiredis.so を配置したパスに適宜変更してください  
-なお保存後は ldconfig を実行し、システムに反映を指示します  
+この事象は、動的ライブラリの格納パスをシステムに認識させる(パスがとおっている場所に配置する)、もしくは doshelper に静的ライブラリとして取り込むことで回避します  
+なお以下の例は、/usr/local/lib を参照パスとした場合です  
+  
+### 回避策１　ldconfig を利用する
+システムに動的ライブラリ（libhiredis.so）を配置したパスを指示します  
+なお設定後は ldconfig を実行してシステムに反映を指示しなければいけません  
 ```
 $ sudo vi /etc/ld.so.conf.d/doshelper.conf
 /usr/local/lib
 $ sudo ldconfig
 ```
-###2) LD_LIBRARY_PATH を利用する
-apache 起動スクリプトに 環境変数（LD_LIBRARY_PATH）に参照パスをセットします  
+### 回避策２ LD_LIBRARY_PATH を利用する
+apache 起動スクリプトに 環境変数を利用してライブラリ参照パスをセットします  
 ```
 $ sudo vi /etc/init.d/httpd
 export LD_LIBRARY_PATH=/usr/local/lib
 ```
-###3) libhiredis.a 静的ライブラリ取り込み
+### 回避策３ libhiredis.a 静的ライブラリ取り込み
 doshelper に hiredisライブラリを取り込みます  
-複数のウェブサーバにライブラリ導入がたいへんな場合は、こちらを選択も検討してください  
-ただライブラリのバージョンアップは、doshelper のリコンパイルと再配置が必要となります  
+複数のウェブサーバにライブラリ導入がたいへんな場合は、こちらを選択してください  
 ```
 $ cd doshelper-master
 $ vi Makefile
@@ -147,9 +144,9 @@ LIBS=/usr/local/lib/libhiredis.a
 $ make
 $ sudo make install
 ```
-###4) hiredisのインストール先変更
-すでに設定されている動的ライブラリ参照パスに hiredis ライブラリをインストールします  
-hiredis のインストール時、引数に PREFIX をつけて格納パスを指示します  
+### 回避策４ hiredisのインストール先変更
+hiredis のインストールを、引数に PREFIX をつけて格納パスを指示します  
+すでに動的ライブラリの参照パスが設定されている場合は、こちらでもOKです  
 ```
 $ cd hiredis-master/
 $ make install PREFIX=/lib64
