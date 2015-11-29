@@ -331,9 +331,6 @@ DoshelperIgnoreContentType  (javascript|image|css|flash|x-font-ttf)
 #### Setting of the DoS pattern
 DoS攻撃とみなす閾値を設定します    
 Sets a threshold regarded as the DoS attack.  
-
-##### Apply to the entire site
-サイト全体に適用する  
   
 ***
 __DoshelperCommmonDosAction__  
@@ -486,7 +483,7 @@ DoshelperIpListFilePath  /var/www/doshelper/control/list.html
 ```
 ***
 
-### Setting of the log
+## Setting of the log
 以下の環境変数に遮断情報がセットされます  
 DoS認定時、通常のアクセス情報に加えて "DoSAttack"の文字列とリクエスト回数を”doshelper_log”として出力します  
   
