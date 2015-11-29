@@ -145,7 +145,7 @@ LIBS=/usr/local/lib/libhiredis.a
 $ make
 $ sudo make install
 ```
-##### 回避策４　hiredisのインストール先変更
+#### 回避策４　hiredisのインストール先変更
 hiredis のインストールを、引数に PREFIX をつけて格納パスを指示します  
 すでに動的ライブラリの参照パスが設定されている場合は、こちらでもOKです  
 ```
