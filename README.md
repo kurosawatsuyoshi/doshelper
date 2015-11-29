@@ -101,7 +101,7 @@ $ make
 $ sudo make install
 ```
   
-#### doshelper 導入後、apache 起動でエラーが発生するケース  
+##### doshelper 導入後、apache 起動でエラーが発生するケース  
 動的ライブラリ(libhiredis.so)がシステムから見つからない場合、エラーが発生します  
 ```
 doshelper.conf: Cannot load /etc/httpd/modules/mod_doshelper.so into server: libhiredis.so.0.13: cannot open shared object file: No such file or directory
@@ -126,15 +126,12 @@ $ sudo vi /etc/ld.so.conf.d/doshelper.conf
 /usr/local/lib
 $ sudo ldconfig
 ```
-
-
 ##### 回避策２　LD_LIBRARY_PATH を利用する
 apache 起動スクリプトに 環境変数を利用してライブラリ参照パスをセットします  
 ```
 $ sudo vi /etc/init.d/httpd
 export LD_LIBRARY_PATH=/usr/local/lib
 ```
-  
 ##### 回避策３　静的ライブラリ（libhiredis.a）として取り込む
 doshelper に hiredisライブラリを組み込んで一体化します  
 こちらのケースは、hiredis ライブラリを気にする必要がありません  
@@ -148,7 +145,6 @@ LIBS=/usr/local/lib/libhiredis.a
 $ make
 $ sudo make install
 ```
-  
 ##### 回避策４　hiredisのインストール先変更
 hiredis のインストールを、引数に PREFIX をつけて格納パスを指示します  
 すでに動的ライブラリの参照パスが設定されている場合は、こちらでもOKです  
@@ -156,7 +152,6 @@ hiredis のインストールを、引数に PREFIX をつけて格納パスを�
 $ cd hiredis-master/
 $ make install PREFIX=/lib64
 ```
-
 ##### SELinux 利用時の注意点
 SELinux 利用時は、上記対策に加え セキュリティコンテキストの再割当が必要です  
 以下のように restorecon コマンドで、apache サービスからライブラリが参照できるようにしてください  
@@ -181,6 +176,8 @@ drwxr-xr-x. root root system_u:object_r:lib_t:s0       pkgconfig
 配布しているソースの"sample"ディレクトリに doshelper.conf として格納しています  
 以下を httpd.conf に記載（もしくは conf.d 配下に配置し Include）することで doshelper を利用することが可能となります  
 An sample configuration for mod_doshelper.  
+  
+doshelper.conf
 ```
 LoadModule setenvif_module modules/mod_setenvif.so
 <IfModule mod_setenvif.c>
@@ -243,9 +240,8 @@ LogFormat  "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %D %T %
 CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS
 ```
 
-各設定項目の詳細となります  
-  
-環境変数 DOSHELPER_IGNORE のセットで、doshelper の処理対象外にすることができます  
+#####各設定項目の詳細
+なお環境変数 DOSHELPER_IGNORE のセットで、doshelper の処理対象外にすることができます  
 サンプルの設定ファイルでは setenvif モジュールを利用し下記を対象外とする例を記述しています    
 * 携帯端末
 * 静的コンテンツ（拡張子が、htm|html|js|css|gif|jpg|png）
@@ -254,7 +250,10 @@ CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS
   
 It becomes the details of each configuration item.  
 By setting the environment variable "DOSHELPER_IGNORE", can be excluded from the process of doshelper.  
-    
+  
+  
+以下、設定項目ごとの詳細となります  
+	
 ***
 __DoshelperAction__  
 doshelperを有効にする場合は on をセットします  
