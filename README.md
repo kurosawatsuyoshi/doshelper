@@ -43,16 +43,16 @@ It is the purpose in efficiency of site operations.
   
 - [hiredis](https://github.com/redis/hiredis)
 - apxs
-- [Redis](http://redis.io/)  version >= 2.4.0.  
+- [redis](http://redis.io/)  version >= 2.4.0.  
 - apache  version 2.0 〜 2.4 (prefork mode)
 
 ## Preparation
 ビルドにあたっての事前要件です  
 
-### hiredis
-Redis接続ライブラリです  
+#### hiredis
+redis接続ライブラリです  
   
-This is Redis connection library.  
+This is redis connection library.  
   
 ```
 $ wget -O hiredis.zip https://github.com/redis/hiredis/archive/master.zip
@@ -62,7 +62,7 @@ $ make
 $ sudo make install
 ```
 
-### apxs
+#### apxs
 apacheモジュールのコンパイル・リンクに必要なツールです  
   
 It is a tool necessary to compile and link the apache module  
@@ -77,7 +77,7 @@ _[Debian/Ubuntu]_
 $ sudo apt-get install apache2-prefork-dev
 ```
 
-### Redis
+#### redis
 doshelper動作時に必要です  
 専用サーバ導入が望ましいのですが、DBサーバやウェブサーバへ同居でも構いません  
 なおDMZ（ウェブサーバ同居）配置の場合は、IP制限などのセキュア対策が必要なため、後述のAppendix「Redis設定」を参照してください  
@@ -118,7 +118,7 @@ $ ldd .libs/mod_doshelper.so
 この事象は、動的ライブラリの格納パスをシステムに認識させる(パスがとおっている場所に配置する)、もしくは doshelper に静的ライブラリとして取り込むことで回避します  
 なお以下の例は、/usr/local/lib を参照パスとした場合です  
   
-### 回避策１　ldconfig を利用する
+##### 回避策１　ldconfig を利用する
 システムに動的ライブラリ（libhiredis.so）を配置したパスを指示します  
 なお設定後は ldconfig を実行してシステムに反映を指示しなければいけません  
 ```
@@ -126,13 +126,13 @@ $ sudo vi /etc/ld.so.conf.d/doshelper.conf
 /usr/local/lib
 $ sudo ldconfig
 ```
-### 回避策２　LD_LIBRARY_PATH を利用する
+##### 回避策２　LD_LIBRARY_PATH を利用する
 apache 起動スクリプトに 環境変数を利用してライブラリ参照パスをセットします  
 ```
 $ sudo vi /etc/init.d/httpd
 export LD_LIBRARY_PATH=/usr/local/lib
 ```
-### 回避策３　静的ライブラリ（libhiredis.a）として取り込む
+##### 回避策３　静的ライブラリ（libhiredis.a）として取り込む
 doshelper に hiredisライブラリを組み込んで一体化します  
 こちらのケースは、hiredis ライブラリを気にする必要がありません  
 複数のウェブサーバにライブラリ導入がたいへんな場合は、こちらを選択してください  
@@ -145,7 +145,7 @@ LIBS=/usr/local/lib/libhiredis.a
 $ make
 $ sudo make install
 ```
-#### 回避策４　hiredisのインストール先変更
+##### 回避策４　hiredisのインストール先変更
 hiredis のインストールを、引数に PREFIX をつけて格納パスを指示します  
 すでに動的ライブラリの参照パスが設定されている場合は、こちらでもOKです  
 ```
@@ -176,9 +176,7 @@ drwxr-xr-x. root root system_u:object_r:lib_t:s0       pkgconfig
 設定ファイルのサンプルです  
 配布しているソースの"sample"ディレクトリに doshelper.conf として格納しています  
 以下を httpd.conf に記載（もしくは conf.d 配下に配置し Include）することで doshelper を利用することが可能となります  
-  
 An sample configuration for mod_doshelper.  
-
 ```
 LoadModule setenvif_module modules/mod_setenvif.so
 <IfModule mod_setenvif.c>
@@ -256,9 +254,8 @@ By setting the environment variable "DOSHELPER_IGNORE", can be excluded from the
 ***
 __DoshelperAction__  
 doshelperを有効にする場合は on をセットします  
-  
 Set the on if you want to enable the doshelper.  
-
+  
 書式：on or off  
 デフォルト：off  
 記載例：  
@@ -269,7 +266,6 @@ DoshelperAction  on
 
 __DoshelperRedisServer__  
 redisサーバを指定します ※ 空白区切りで複数のRedisサーバが指定できます  
-  
 Specify the redis server ※ You can specify multiple Redis server separated by spaces.  
   
 書式：サーバ名:ポート （サーバ名:ポート）  
@@ -282,7 +278,6 @@ DoshelperRedisServer  localhost:6379  localhost:6380
 
 __DoshelperRedisConnectTimeout__  
 redisコネクトのタイムアウトを指定します。 応答速度にあわせ調整可能です  
-  
 Specify a time-out of redis connect. It is adjustable according to the response speed.  
   
 書式：秒 (空白) マイクロ秒  
@@ -295,7 +290,6 @@ DoshelperRedisConnectTimeout  0  050000
 
 __DoshelperRedisRequirepass__  
 redis接続パスワードを指定します  
-  
 Specify the redis connection password.  
   
 書式：文字列  
@@ -308,7 +302,6 @@ DoshelperRedisRequirepass  tiger
 
 __DoshelperRedisDatabase__  
 16個のデータベース領域（デフォルト）で利用するデータベース領域を数値で指定します  
-  
 Specify a numeric value database area to be used by 16 of the database area (default).  
   
 書式：数値（0〜15）  
@@ -321,7 +314,6 @@ DoshelperRedisDatabase  0
 
 __DoshelperIgnoreContentType__  
 処理対象外とするコンテントタイプを指定します  
-  
 Specify the content type to be excluded.  
   
 書式：文字列 ※ 複数指定時はパイプ（｜）文字で連結します  
@@ -331,19 +323,18 @@ Specify the content type to be excluded.
 DoshelperIgnoreContentType  (javascript|image|css|flash|x-font-ttf)
 ```
 ***
-
-### Setting of the DoS pattern
-DoS攻撃とみなす閾値を設定します  
   
+  
+#### Setting of the DoS pattern
+DoS攻撃とみなす閾値を設定します    
 Sets a threshold regarded as the DoS attack.  
 
-#### Apply to the entire site
+##### Apply to the entire site
 サイト全体に適用する  
   
 ***
 __DoshelperCommmonDosAction__  
 サイト全体に適用する場合 on を指定します  
-  
 Specify the on if that apply to the entire site.  
   
 書式：on or off  
@@ -358,14 +349,12 @@ __DoshelperDosCheckTime__
 __DoshelperDosRequest__  
 __DoshelperDosWaitTime__  
 サイト全体に適用する遮断の閾値を設定します  
-  
 Specify the threshold that applies to the entire site.  
   
 書式：数値  
 デフォルト：なし  
 記述例：  
 30秒間に同一IPから10回のリクエストで、60秒間遮断するケース  
-  
 60 Seconds Shut-out at 10 Requests to 30 Seconds.  
   
 ```
@@ -375,44 +364,38 @@ DoshelperDosWaitTime   60
 ```
 ***
 
-#### Apply to the URL
+##### Apply to the URL
 URL単位で適用する  
 
 ***
 __DoshelperDosCase__  
 URL単位で遮断するケースで利用します  
-  
 defense of the DoS of url unit.  
   
 書式：ctime="チェックする秒" request="リクエスト回数" wtime="遮断時間（秒）"  
 デフォルト：なし  
 記述例：  
 "/foo/bar.php"に対して5秒間に3回以上のリクエストで120秒遮断するケース  
-  
 "/foo/bar.php" is, 120 Seconds Shut-out at 3 Requests to 5 Seconds.  
-  
 ```
 DoshelperDosCase "^/foo/bar.php" ctime="5" request="3" wtime="120"
 ```
   
 "/cgi-bin/hoge/"のディレクトリ配下に対し、10秒間に15回以上のリクエストで5秒遮断するケース  
-  
 "/cgi-bin/hoge/" is, 5 Seconds Shut-out at 15 Requests to 10 Seconds.  
-  
 ```
 DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"
 ```
 ***
-
+  
+  
 ### Setting of the block pattern
 レスポンスコード返却、または遮断画面表示の選択が可能です  
-  
 Select the "return the specific response code" or "cut-off screen".  
   
 ***
 __DoshelperReturnType__  
 遮断時のレスポンスコードを指定します  
-  
 Specify a response code at the time of cut-off.  
   
 書式：レスポンスコード  
@@ -426,10 +409,7 @@ DoshelperReturnType  403
 __DoshelperDosFilePath__  
 事前に用意したHTMLを遮断時に表示させます（DoshelperReturnTypeと併用はできません）  
 apacheユーザ（またはグループ）の参照権限を付与してください  
-  
-Display the HTML at the time of cut-off.  
-"DoshelperReturnType" and combined it can not.  
-Please give the reference authority in apache.  
+Display the HTML at the time of cut-off. "DoshelperReturnType" and combined it can not. Please give the reference authority in apache.  
   
 書式：フルパス名  
 デフォルト：なし  
@@ -438,16 +418,14 @@ Please give the reference authority in apache.
 DoshelperDosFilePath  /var/www/doshelper/control/dos.html
 ```
 ***
-
+  
+  
 ### Setting of the ip control
 現在のアクセス状況の確認や、特定のIPを無条件遮断ができる管理画面の指定です  
-  
-Specify a management screen.  
-Can be IP blocking and confirmed of access status.  
+Specify a management screen. Can be IP blocking and confirmed of access status.  
   
 __DoshelperControlAction__  
 IP即時遮断画面の利用有無を指定します  
-  
 Specify the use of IP immediate cut-off screen.  
   
 書式：on or off  
@@ -494,7 +472,6 @@ __DoshelperIpCompleteFilePath__
 __DoshelperIpListFilePath__  
   
 管理画面のテンプレートファイルです  
-  
 This is the template file management screen.  
   
 外部に公開されない（ドキュメントルート外）に配置し、フルパスで記述してください  
@@ -513,6 +490,7 @@ DoshelperIpListFilePath  /var/www/doshelper/control/list.html
 ### Setting of the log
 以下の環境変数に遮断情報がセットされます  
 DoS認定時、通常のアクセス情報に加えて "DoSAttack"の文字列とリクエスト回数を”doshelper_log”として出力します  
+  
 ***
 DH_DOS：DoS認定された場合、"DoSAttack"の文字列がセットされます  
 DH_CNT：リクエスト回数がセットされます  
@@ -527,9 +505,10 @@ DH_CNT：リクエスト回数がセットされます
 IP - - [07/Nov/2015:18:44:17 +0900] "GET / HTTP/1.1" 200 1160 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:31.0) Gecko/20100101 Firefox/31.0" 11475 0 80 "DoSAttack" "11"
 IP - - [07/Nov/2015:18:44:17 +0900] "GET / HTTP/1.1" 200 1160 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:31.0) Gecko/20100101 Firefox/31.0" 12060 0 80 "DoSAttack" "12"
 ```
-
+  
+  
 #Appendix
-## hiredisのパッケージ導入
+### hiredisのパッケージ導入
 CentOSでは hiredis のパッケージ導入が可能です  
 
 _[CentOS 7]_
@@ -546,5 +525,5 @@ _[CentOS 6]_
 sudo yum install --enablerepo=epel hiredis hiredis-devel
 ```
 
-## Redis設定
+### Redis設定
 [こちらを参照してください](https://github.com/kurosawatsuyoshi/doshelper/wiki/1.-Redis-Setup)
