@@ -224,13 +224,13 @@ CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS
 ```
 
 各設定項目の詳細となります  
-なお 環境変数 DOSHELPER_IGNORE をセットすることで、doshelper の処理から除外することができます  
-サンプルの設定ファイルでは setenvif モジュールを利用して
--- 携帯端末
--- 静的コンテンツ（拡張子が、htm|html|js|css|gif|jpg|png）  
--- ローカルからのアクセス
--- 指定したURL
-を処理対象外とする例を記述していますので、適宜変更してください  
+  
+環境変数 DOSHELPER_IGNORE のセットで、doshelper の処理対象外にすることができます  
+サンプルの設定ファイルでは setenvif モジュールを利用し下記を対象外とする例を記述しています    
+* 携帯端末
+* 静的コンテンツ（拡張子が、htm|html|js|css|gif|jpg|png）
+* ローカルからのアクセス
+* 指定したURL
   
 It becomes the details of each configuration item.  
 By setting the environment variable "DOSHELPER_IGNORE", can be excluded from the process of doshelper.  
