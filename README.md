@@ -145,7 +145,7 @@ LIBS=/usr/local/lib/libhiredis.a
 $ make
 $ sudo make install
 ```
-### 回避策４　hiredisのインストール先変更
+##### 回避策４　hiredisのインストール先変更
 hiredis のインストールを、引数に PREFIX をつけて格納パスを指示します  
 すでに動的ライブラリの参照パスが設定されている場合は、こちらでもOKです  
 ```
@@ -153,8 +153,9 @@ $ cd hiredis-master/
 $ make install PREFIX=/lib64
 ```
   
-なお SELinux 利用時は、上記対策に加え セキュリティコンテキストの再割当が必要です  
-以下のように restorecon コマンドで、apache サービスが参照できるようにしてください  
+##### SELinux 利用時の注意点
+SELinux 利用時は、上記対策に加え セキュリティコンテキストの再割当が必要です  
+以下のように restorecon コマンドで、apache サービスからライブラリが参照できるようにしてください  
 ```
 $ ls -lZ /usr/local/lib
 -rw-rw-r--. coco coco unconfined_u:object_r:user_home_t:s0 libhiredis.a
