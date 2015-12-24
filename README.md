@@ -519,4 +519,4 @@ sudo yum install --enablerepo=epel hiredis hiredis-devel
 ```
 
 ### Redis設定
-[こちらを参照してください](https://github.com/kurosawatsuyoshi/doshelper/wiki/1.-Redis-Setup)
+[こちらを参照してください](https://github.com/kurosawatsuyoshi/doshelper/wiki/1.-redis-Setup%EF%BC%88redis%E3%81%AE%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%EF%BC%89)
