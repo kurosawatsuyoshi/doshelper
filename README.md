@@ -98,6 +98,13 @@ $ make
 $ sudo make install
 ```
   
+##### configure で apxs が見つからないケース 
+pathがとおっていない場合は --with-apxs で apxs のパスを指定します 
+```
+configure: error: apxs not found. set apxs with --with-apxs.
+$ ./configure --with-apxs=/usr/local/apache2.X.XX/bin/apxs
+```
+
 ##### doshelper 導入後、apache 起動でエラーが発生するケース  
 動的ライブラリ(libhiredis.so)がシステムから見つからない場合、エラーが発生します  
 ```
