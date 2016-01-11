@@ -102,9 +102,9 @@ static apr_status_t put_screen_dos(request_rec *r) {
     config_s *cfg = (config_s *)ap_get_module_config(s->module_config, &doshelper_module);
     char *pbuf = (char *)NULL;
 
-    if (cfg->dosfile->page == (char *)NULL || strlen(cfg->dosfile->page) == 0) return DECLINED;
+    if (cfg->dos->dosfile->page == (char *)NULL || strlen(cfg->dos->dosfile->page) == 0) return DECLINED;
 
-    pbuf = apr_pstrdup(r->pool, cfg->dosfile->page);
+    pbuf = apr_pstrdup(r->pool, cfg->dos->dosfile->page);
     pbuf = util_strconv(r, pbuf, CNV_IP, get_ip_address(r));
     pbuf = util_strconv(r, pbuf, CNV_APACHE_MAJOR,
         (const char *)apr_psprintf(r->pool, "%d", AP_SERVER_MAJORVERSION_NUMBER));
@@ -663,7 +663,7 @@ static int set_dos_address_redis
 
     // Common-DoS or URL-DoS check
     if (details == (detailsdos_s *)NULL) {
-        dostime = cfg->common_dos->time;
+        dostime = cfg->dos->time;
     }
     else {
         dostime = details->time;
@@ -674,7 +674,7 @@ static int set_dos_address_redis
     if (block) {
         rep = (redisReply *)redisCommand(context, apr_psprintf(r->pool,
             "SET "MODULE_KEY_NAME":"REDIS_KEY_DOS":%s:%s %d",
-                path, address, cfg->common_dos->request + 1));
+                path, address, cfg->dos->request + 1));
 
         if (rep == (redisReply *)NULL) {
             ALERTLOG("failed to set or incr the address rep[NULL]");
@@ -689,7 +689,7 @@ static int set_dos_address_redis
         freeReplyObject(rep);
 
         WARNLOG("IP-control: SET "REDIS_KEY_DOS":%s:%s count[%d]",
-            path, address, cfg->common_dos->request+1);
+            path, address, cfg->dos->request+1);
         return cnt;
     }
 
@@ -883,7 +883,7 @@ static apr_status_t set_wait_dos_redis
 
     // Common-DoS or URL-DoS check
     if (details == (detailsdos_s *)NULL) {
-        dostime = cfg->common_dos->wait;
+        dostime = cfg->dos->wait;
     }
     else {
         dostime = details->wait;
@@ -939,8 +939,8 @@ static detailsdos_s *get_detail_dos_list(request_rec *r) {
     else { url = apr_psprintf(r->pool, "%s?%s", r->uri, r->args); }
 
     // Config Detail ID Getting
-    for (i = 0; i < cfg->detailsdos_s->nelts; i++) {
-        val = (detailsdos_s *)(cfg->detailsdos_s->elts + (cfg->detailsdos_s->elt_size * i));
+    for (i = 0; i < cfg->dos->detailsdos_s->nelts; i++) {
+        val = (detailsdos_s *)(cfg->dos->detailsdos_s->elts + (cfg->dos->detailsdos_s->elt_size * i));
 
         // URL(Path) Check
         if (check_regular_expression(r, val->path, url) == APR_SUCCESS) {
@@ -977,7 +977,7 @@ static apr_status_t check_common_dos_handler
 
     // judgment of the dos attack
     cnt = set_dos_address_redis(r, context, address, (detailsdos_s *)NULL, 0);
-    if (cnt > cfg->common_dos->request) {
+    if (cnt > cfg->dos->request) {
         if (set_wait_dos_redis(r, context, address, (detailsdos_s *)NULL) == APR_SUCCESS) {
             // Set Status
             st->visit  = __ERROR;
@@ -1075,7 +1075,7 @@ static apr_status_t doshelper_handler(request_rec *r) {
     if (status == DECLINED || st->status != __NORMAL) { goto exit_handler; }
 
     // Common DoS Check
-    if ( cfg->common_dos->action == FLG_ON) {
+    if ( cfg->dos->action == FLG_ON) {
         status = check_common_dos_handler(r, context, address, st);
         if (status == DECLINED || st->status != __NORMAL) { goto exit_handler; }
     }
@@ -1089,7 +1089,7 @@ exit_handler:
     INFOLOG("--exit-- apache%d.%d",
         AP_SERVER_MAJORVERSION_NUMBER, AP_SERVER_MINORVERSION_NUMBER);
  
-    if (st->status == __NORMAL || strlen(cfg->dosfile->page) > 0 ) {
+    if (st->status == __NORMAL || strlen(cfg->dos->dosfile->page) > 0 ) {
         return DECLINED;
     }
 
@@ -1238,7 +1238,7 @@ static apr_status_t template_handler(request_rec *r) {
     if (decline_check(r) == DECLINED) return DECLINED;
 
     // HTML Template Mode - BlockPage
-    if (strlen(cfg->dosfile->page) > 0) {
+    if (strlen(cfg->dos->dosfile->page) > 0) {
         pbuf = (const char *)apr_table_get(r->subprocess_env, "DH_DOS");
         if (pbuf != (const char *)NULL && strlen(pbuf) > 0) {
             if (put_screen_dos(r) == APR_SUCCESS) return OK;
@@ -1369,7 +1369,7 @@ static apr_status_t initialize_module
         }
 
         // DoS TamplatePage Reading
-        status = initialize_set_templatefile(s, p, cfg->dosfile, "Dosfilepath");
+        status = initialize_set_templatefile(s, p, cfg->dos->dosfile, "Dosfilepath");
 
         // IP Set-Form TamplatePage Reading
         status = initialize_set_templatefile(s, p, cfg->ctl->setfile, "IpSetFormFilePath");
@@ -1626,8 +1626,8 @@ static const char* set_dosaction_config(cmd_parms *parms, void *mconfig, const c
     server_rec *s = (server_rec *)parms->server;
     config_s *cfg = (config_s *)ap_get_module_config(s->module_config, &doshelper_module);
 
-    if (ap_strcasecmp_match("on", arg) == 0) { cfg->common_dos->action = FLG_ON; }
-    else { cfg->common_dos->action = FLG_OFF; }
+    if (ap_strcasecmp_match("on", arg) == 0) { cfg->dos->action = FLG_ON; }
+    else { cfg->dos->action = FLG_OFF; }
 
     DEBUGLOG("%s:%d=[common dos action]=[%s]",
         parms->server->server_hostname, parms->server->port, arg);
@@ -1643,7 +1643,7 @@ static const char* set_time_config(cmd_parms *parms, void *mconfig, const char *
     if ((lval > UINT_MAX) || (lval < 0)) {
         return "Integer invalid number DoSTime(0-15[65535])";
     }
-    cfg->common_dos->time = (unsigned int)lval;
+    cfg->dos->time = (unsigned int)lval;
 
     DEBUGLOG("%s:%d=[time]=[%s]", parms->server->server_hostname, parms->server->port, arg);
     return (const char *)NULL;
@@ -1658,7 +1658,7 @@ static const char* set_request_config(cmd_parms *parms, void *mconfig, const cha
     if ((lval > UINT_MAX) || (lval < 0)) {
         return "Integer invalid number DoSRequest(0-15[65535])";
     }
-    cfg->common_dos->request = (unsigned int)lval;
+    cfg->dos->request = (unsigned int)lval;
 
     DEBUGLOG("%s:%d=[request]=[%s]", parms->server->server_hostname, parms->server->port, arg);
     return (const char *)NULL;
@@ -1673,7 +1673,7 @@ static const char* set_wait_config(cmd_parms *parms, void *mconfig, const char *
     if ((lval > UINT_MAX) || (lval < 0)) {
         return "Integer invalid number DoSWait(0-15[65535])";
     }
-    cfg->common_dos->wait = (unsigned int)lval;
+    cfg->dos->wait = (unsigned int)lval;
 
     DEBUGLOG("%s:%d=[wait]=[%s]", parms->server->server_hostname, parms->server->port, arg);
 
@@ -1691,8 +1691,8 @@ static const char* set_doscase_config
 
     // Set Path (check for duplicate path)
     fg = FLG_OFF;
-    for (i = 0; i < cfg->detailsdos_s->nelts; i++) {
-        val = (detailsdos_s*)(cfg->detailsdos_s->elts + (cfg->detailsdos_s->elt_size * i));
+    for (i = 0; i < cfg->dos->detailsdos_s->nelts; i++) {
+        val = (detailsdos_s*)(cfg->dos->detailsdos_s->elts + (cfg->dos->detailsdos_s->elt_size * i));
         if (strcmp(arg1, val->path) == 0) {
             fg = FLG_ON;
             break;
@@ -1700,7 +1700,7 @@ static const char* set_doscase_config
     }
     // check for duplicate
     if (fg == FLG_OFF) {
-        val = (detailsdos_s*)apr_array_push(cfg->detailsdos_s);
+        val = (detailsdos_s*)apr_array_push(cfg->dos->detailsdos_s);
         val->path = apr_pstrdup(parms->pool, arg1);
     }
 
@@ -1745,7 +1745,7 @@ static const char* set_dosfilepath_config(cmd_parms *parms, void *mconfig, const
     server_rec *s = (server_rec *)parms->server;
     config_s *cfg = (config_s *)ap_get_module_config(s->module_config, &doshelper_module);
 
-    cfg->dosfile->filepath = apr_pstrdup(parms->pool, (char*)arg);
+    cfg->dos->dosfile->filepath = apr_pstrdup(parms->pool, (char*)arg);
 
     DEBUGLOG("%s:%d=[DoshelperDosfilepath]=[%s]",
         parms->server->server_hostname, parms->server->port, arg);
@@ -1974,15 +1974,15 @@ static void *create_doshelper_config_svr(apr_pool_t *p, server_rec *dummy) {
     cfg->redis->timeout_msec = 50000;
     cfg->redis->database = 0;
     cfg->redis->context = (redisContext *)NULL;
-    cfg->common_dos = (commondos_s *)apr_pcalloc(p, sizeof(commondos_s));
-    cfg->common_dos->action = FLG_OFF;
-    cfg->common_dos->time = 0;
-    cfg->common_dos->request = 0;
-    cfg->common_dos->wait = 0;
-    cfg->detailsdos_s = apr_array_make(p, 0, sizeof(detailsdos_s));
-    cfg->dosfile = (initfile_s *)apr_pcalloc(p, sizeof(initfile_s));
-    cfg->dosfile->filepath = apr_pstrdup(p, "");
-    cfg->dosfile->page = apr_pstrdup(p, "");
+    cfg->dos = (dos_s *)apr_pcalloc(p, sizeof(dos_s));
+    cfg->dos->action = FLG_OFF;
+    cfg->dos->time = 0;
+    cfg->dos->request = 0;
+    cfg->dos->wait = 0;
+    cfg->dos->detailsdos_s = apr_array_make(p, 0, sizeof(detailsdos_s));
+    cfg->dos->dosfile = (initfile_s *)apr_pcalloc(p, sizeof(initfile_s));
+    cfg->dos->dosfile->filepath = apr_pstrdup(p, "");
+    cfg->dos->dosfile->page = apr_pstrdup(p, "");
     cfg->ctl = (control_s *)apr_pcalloc(p, sizeof(control_s));
     cfg->ctl->action = FLG_OFF;
     cfg->ctl->white = (action_s *)apr_pcalloc(p, sizeof(action_s));

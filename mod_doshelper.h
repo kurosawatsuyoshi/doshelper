@@ -109,41 +109,20 @@
 #define DEBUGLOG(...) ap_log_error(APLOG_MARK, APLOG_NOERRNO|APLOG_DEBUG, 0, s, MODULE_NAME ": " __VA_ARGS__)
 
 // Config Struct
-typedef struct {
-    unsigned int action;
-    unsigned int development;
-    unsigned int history;
-    unsigned int forwarded;
-    unsigned int http_service_return;
-    apr_array_header_t *ct_ignore;
-    apr_array_header_t *ct_regexp;
-} common_s;
-
-typedef struct {
-    unsigned int action;
-    unsigned int time;
-    unsigned int request;
-    unsigned int wait;
-} commondos_s;
-
-typedef struct {
-    char *path;
-    unsigned int time;
-    unsigned int request;
-    unsigned int wait;
-} detailsdos_s;
-
+// Display File Path Structs
 typedef struct {
     char *filepath;
     char *page;
 } initfile_s;
 
+// Control Panel Action Structs
 typedef struct {
     char *set;
     char *del;
     char *list;
 } action_s;
 
+// Control Panel Structs
 typedef struct {
     unsigned int action;
     action_s *white;
@@ -156,6 +135,25 @@ typedef struct {
     unsigned int display;
 } control_s;
 
+// DoS Detail Structs
+typedef struct {
+    char *path;
+    unsigned int time;
+    unsigned int request;
+    unsigned int wait;
+} detailsdos_s;
+
+// DoS Control Structs
+typedef struct {
+    unsigned int action;
+    unsigned int time;
+    unsigned int request;
+    unsigned int wait;
+    initfile_s *dosfile;
+    apr_array_header_t *detailsdos_s;
+} dos_s;
+
+// Redis Structs
 typedef struct {
     apr_array_header_t *server;
     int history;
@@ -166,7 +164,18 @@ typedef struct {
     redisContext *context;
 } redis_s;
 
-// Mutex Struct
+// Common Structs
+typedef struct {
+    unsigned int action;
+    unsigned int development;
+    unsigned int history;
+    unsigned int forwarded;
+    unsigned int http_service_return;
+    apr_array_header_t *ct_ignore;
+    apr_array_header_t *ct_regexp;
+} common_s;
+
+// Mutex Structs
 typedef struct {
     unsigned int action;
     apr_global_mutex_t *mutex;
@@ -176,9 +185,7 @@ typedef struct {
     mutex_s *mutex;
     common_s *common;
     redis_s *redis;
-    commondos_s *common_dos;
-    apr_array_header_t *detailsdos_s;
-    initfile_s *dosfile;
+    dos_s *dos;
     control_s *ctl;
 } config_s;
 
