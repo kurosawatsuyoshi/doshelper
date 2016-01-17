@@ -531,8 +531,8 @@ sudo yum install --enablerepo=epel hiredis hiredis-devel
 ## License
 - doshelper  
 No License.  
-Copyright (C) 2015-2016, Tsuyoshi Kurosawa <coco@cocopoo.com>  
-Copyright (C) 2012-2015, Tsuyoshi Kurosawa <kurosawa.tsuyoshi@jamhelper.com>  
+Copyright (C) 2015-2016, Tsuyoshi Kurosawa \<<coco@cocopoo.com>\>  
+Copyright (C) 2012-2015, Tsuyoshi Kurosawa \<<kurosawa.tsuyoshi@jamhelper.com>\>  
    
 個人利用、商用利用のみ許可します。著作権表示は消去しないでください。  
 ソースの修正・改変、配布、サブライセンスは許可しておりません。  
@@ -542,6 +542,6 @@ Modify of the source, distribution, sub-license does not permit.
   
 - hiredis   
 BSD license.  
-Copyright (c) 2009-2011, Salvatore Sanfilippo <antirez at gmail dot com>  
-Copyright (c) 2010-2011, Pieter Noordhuis <pcnoordhuis at gmail dot com>  
+Copyright (c) 2009-2011, Salvatore Sanfilippo \<antirez at gmail dot com\>  
+Copyright (c) 2010-2011, Pieter Noordhuis \<pcnoordhuis at gmail dot com\>  
 All rights reserved.  
