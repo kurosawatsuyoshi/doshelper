@@ -1187,6 +1187,7 @@ static apr_status_t control_handler(request_rec *r, int lookup_uri) {
     config_s *cfg = (config_s *)ap_get_module_config(s->module_config, &doshelper_module);
 
     if (cfg->ctl->action == FLG_OFF) return DECLINED;
+    if (strcmp(r->uri, "*") == APR_SUCCESS) return DECLINED;
 
     // List the White IP
     if (ap_strcasecmp_match(cfg->ctl->white->list, r->uri) == APR_SUCCESS) {
