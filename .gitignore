@@ -1,0 +1,12 @@
+.libs/
+Makefile
+autom4te.cache/
+config.h
+config.log
+config.status
+mod_doshelper.la
+mod_doshelper.lo
+mod_doshelper.o
+mod_doshelper.slo
+mod_doshelper.loT
+

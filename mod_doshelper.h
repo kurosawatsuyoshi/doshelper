@@ -1,4 +1,4 @@
-﻿#ifdef _WIN32
+#ifdef _WIN32
   #include <rpc.h>
   #include <stdarg.h>
 #else

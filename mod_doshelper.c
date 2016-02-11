@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 **  mod_doshelper.c -- Apache doshelper module
 **
 **  Copyright (C) 2012-2015 Tsuyoshi Kurosawa
