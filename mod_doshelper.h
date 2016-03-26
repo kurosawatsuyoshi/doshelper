@@ -207,3 +207,12 @@ typedef enum {
     __ERROR
 } visit_e;
 
+// Declaration 
+module AP_MODULE_DECLARE_DATA doshelper_module;
+
+#include "util.h"
+#include "screen.h"
+#include "control.h"
+#include "ctype.h"
+#include "redis.h"
+

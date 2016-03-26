@@ -99,18 +99,49 @@ $ sudo make install
 ```
   
 ##### configure で apxs が見つからないケース 
-pathがとおっていない場合は --with-apxs で apxs のパスを指定します 
+apxs のパスがとおっていない場合は --with-apxs で apxs のパスを指定します 
 ```
 configure: error: apxs not found. set apxs with --with-apxs.
 $ ./configure --with-apxs=/usr/local/apache2.X.XX/bin/apxs
 ```
-
+  
 ##### doshelper 導入後、apache 起動でエラーが発生するケース  
-動的ライブラリ(libhiredis.so)がシステムから見つからない場合、エラーが発生します  
+SELinux 利用時、または動的ライブラリ(libhiredis.so)が見つからない場合、エラーが発生します  
 ```
 doshelper.conf: Cannot load /etc/httpd/modules/mod_doshelper.so into server: libhiredis.so.0.13: cannot open shared object file: No such file or directory
 ```
-doshelper を ldd コマンドで確認すると、libhiredis.so のパスが見つからず not found  となっていることが確認できます  
+
+##### SELinux 利用時の注意点
+SELinux 利用時はライブラリ導入後はセキュリティコンテキストの再割当が必要です  
+SELinux を有効にするならば restorecon コマンドで libhiredis.so のラベルをリフレッシュし  
+apache サービスからライブラリが参照できるようにしてください  
+  
+##### libhiredis.so のラベルのリフレッシュ
+```
+$ cd /usr/local/lib
+$ ls -Z libhiredis.so*
+lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so -> libhiredis.so.0
+lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so.0 -> libhiredis.so.0.11
+-rwxrwxr-x. root root unconfined_u:object_r:user_home_t:s0 libhiredis.so.0.11
+$ sudo /sbin/restorecon libhiredis.so.0.11
+$ ls -Z libhiredis.so*
+lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so -> libhiredis.so.0
+lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so.0 -> libhiredis.so.0.11
+-rwxrwxr-x. root root unconfined_u:object_r:lib_t:s0   libhiredis.so.0.11
+```
+
+##### SELinux の無効化  
+SELinux が不要であれば無効にします  
+```
+$ sudo vi /etc/selinux/config
+-----
+SELINUX=disabled
+-----
+$ sudo reboot
+```
+  
+SELinux 対処後もライブラリが参照不可の場合は、ライブラリの格納パスがシステムに認識されてません  
+ldd コマンドで libhiredis.so のパスが not found  となっていることを確認できます  
 ```
 $ ldd .libs/mod_doshelper.so 
 	linux-vdso.so.1 =>  (0x00007ffc887a9000)
@@ -119,16 +150,17 @@ $ ldd .libs/mod_doshelper.so
 	/lib64/ld-linux-x86-64.so.2 (0x000000356ee00000)
 ```
   
-この事象は、動的ライブラリの格納パスをシステムに認識させる(パスがとおっている場所に配置する)、もしくは doshelper に静的ライブラリとして取り込むことで回避します  
-なお以下の例は、/usr/local/lib を参照パスとした場合です  
+ライブラリの格納パスをシステムに認識させるか doshelper に静的ライブラリとして取り込むことで回避します  
+以下例は、/usr/local/lib を参照パスとした場合です  
   
 ##### 回避策１　ldconfig を利用する
 システムに動的ライブラリ（libhiredis.so）を配置したパスを指示します  
-なお設定後は ldconfig を実行してシステムに反映を指示しなければいけません  
+なお設定後は ldconfig を実行してシステムに反映を指示します  
 ```
 $ sudo vi /etc/ld.so.conf.d/doshelper.conf
 /usr/local/lib
 $ sudo ldconfig
+$ sudo ldconfig -p | grep libhiredis.so
 ```
 ##### 回避策２　LD_LIBRARY_PATH を利用する
 apache 起動スクリプトに 環境変数を利用してライブラリ参照パスをセットします  
@@ -137,24 +169,23 @@ $ sudo vi /etc/init.d/httpd
 export LD_LIBRARY_PATH=/usr/local/lib
 ```
 ##### 回避策３　静的ライブラリ（libhiredis.a）として取り込む
-doshelper に hiredisライブラリを組み込んで一体化します  
-こちらのケースは、hiredis ライブラリを気にする必要がありません  
-複数のウェブサーバにライブラリ導入がたいへんな場合は、こちらを選択してください  
+hiredis ライブラリを doshelper に組み込んで一体化させます  
+ファイルサイズは大きくなりますが hiredis ライブラリをサーバごと導入する必要が無いため大規模な分散環境などで導入が困難な場合は、こちらの手法も検討ください  
 ```
 $ cd doshelper-master
 $ vi Makefile
+-----
 #LIBS=-lhiredis
 LIBS=/usr/local/lib/libhiredis.a
-
+-----
 $ make
 $ sudo make install
 ```
 ##### 回避策４　hiredisのインストール先変更
-hiredis のインストールを、引数に PREFIX をつけて格納パスを指示します  
-すでに動的ライブラリの参照パスが設定されている場合は、こちらでもOKです  
+システムの動的ライブラリ参照パスが判明している場合は、hiredis のインストールにて格納パスを指示します  
 ```
 $ cd hiredis-master/
-$ make install PREFIX=/lib64
+$ sudo make install PREFIX=/lib64
 ```
 ##### SELinux 利用時の注意点
 SELinux 利用時は、上記対策に加え セキュリティコンテキストの再割当が必要です  

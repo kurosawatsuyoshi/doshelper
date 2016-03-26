@@ -10,7 +10,7 @@ DEFS=-Wall
 LIBS=@LIBHIREDIS_LDFLAGS@
 #LIBS=-L/usr/local/lib -lhiredis
 #LIBS=/usr/local/lib/libhiredis.a
-SRCS=mod_doshelper.c
+SRCS=mod_doshelper.c util.c screen.c control.c ctype.c redis.c
 
 #   the default target
 all:
