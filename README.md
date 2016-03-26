@@ -217,9 +217,9 @@ doshelper.conf
 LoadModule setenvif_module modules/mod_setenvif.so
 <IfModule mod_setenvif.c>
 # doshelper Ignore
-SetEnvIf User-Agent "(DoCoMo|UP.Browser|KDDI|J-PHONE|Vodafone|SoftBank)" DOSHELPER_IGNORE
 SetEnvIf Request_URI "\.(htm|html|js|css|gif|jpg|png)$" DOSHELPER_IGNORE
-SetEnvIf Remote_Addr "(192.168.0.0/16|172.16.168.0/31|10.0)" DOSHELPER_IGNORE
+# SetEnvIf User-Agent "(DoCoMo|UP.Browser|KDDI|J-PHONE|Vodafone|SoftBank)" DOSHELPER_IGNORE
+# SetEnvIf Remote_Addr "(^192.168.|^172.(1[6-9]|2[0-9]|3[0-1]).|^10.)" DOSHELPER_IGNORE
 # SetEnvIf Request_URI "^/foo/bar/" DOSHELPER_IGNORE
 # SetEnvIf Request_URI "^/hoge/hoge.php" DOSHELPER_IGNORE
 </IfModule>
@@ -228,7 +228,7 @@ LoadModule doshelper_module  modules/mod_doshelper.so
 <IfModule mod_doshelper.c>
 DoshelperAction on
 
-DoshelperRedisServer localhost:6379
+DoshelperRedisServer localhost:6379 localhost:6380 localhost:6381 localhost:6382
 # DoshelperRedisConnectTimeout 0 50000
 # DoshelperRedisRequirepass tiger
 # DoshelperRedisDatabase 0
@@ -250,23 +250,26 @@ DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"
 
 ## setting of the return code or block screen
 DoshelperReturnType 403
+# ErrorDocument 403 "403 Forbidden"
+# ErrorDocument 403 /hoge/ErrorDocument/403.html
 #DoshelperDosFilePath /var/www/doshelper/control/dos.html
 
 # setting of the ip control
 DoshelperControlAction off
+#DoshelperControlAction on
 # uri
-DoshelperIpWhiteList  "/whitelist"
-DoshelperIpWhiteSet   "/whitelistset"
-DoshelperIpWhiteDel   "/whitelistdelete"
-DoshelperIpBlackList  "/blacklist"
-DoshelperIpBlackSet   "/blacklistset"
-DoshelperIpBlackDel   "/blacklistdelete"
-DoshelperControlFree  60
-DoshelperDisplayCount 100
+#DoshelperIpWhiteList  "/whitelist"
+#DoshelperIpWhiteSet   "/whitelistset"
+#DoshelperIpWhiteDel   "/whitelistdelete"
+#DoshelperIpBlackList  "/blacklist"
+#DoshelperIpBlackSet   "/blacklistset"
+#DoshelperIpBlackDel   "/blacklistdelete"
+#DoshelperControlFree  60
+#DoshelperDisplayCount 100
 # template file
-DoshelperIpSetFormFilePath /var/www/doshelper/control/setform.html
-DoshelperIpCompleteFilePath /var/www/doshelper/control/complete.html
-DoshelperIpListFilePath  /var/www/doshelper/control/list.html
+#DoshelperIpSetFormFilePath /var/www/doshelper/control/setform.html
+#DoshelperIpCompleteFilePath /var/www/doshelper/control/complete.html
+#DoshelperIpListFilePath  /var/www/doshelper/control/list.html
 
 </IfModule>
 
@@ -278,8 +281,8 @@ CustomLog "/var/log/httpd/doshelper_log" doshelper_doslog env=DH_DOS
 #####各設定項目の詳細
 なお環境変数 DOSHELPER_IGNORE のセットで、doshelper の処理対象外にすることができます  
 サンプルの設定ファイルでは setenvif モジュールを利用し下記を対象外とする例を記述しています    
-* 携帯端末
 * 静的コンテンツ（拡張子が、htm|html|js|css|gif|jpg|png）
+* 携帯端末
 * ローカルからのアクセス
 * 指定したURL
   
