@@ -96,7 +96,7 @@ extern redisContext *connect_redis_master(server_rec *s, char *redisip_port) {
         return (redisContext *)NULL;
     }
     if (context->err) {
-        DEBUGLOG("failed to %s [%s:%s]", context->errstr, redis_ip, redis_port);
+        WARNLOG("failed to %s [%s:%s]", context->errstr, redis_ip, redis_port);
         goto exit_function;
     }
 
