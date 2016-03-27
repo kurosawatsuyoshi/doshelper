@@ -59,7 +59,33 @@ $ cd hiredis-master/
 $ make
 $ sudo make install
 ```
+##### SELinux の注意点
+SELinux 利用時はライブラリ導入後にセキュリティコンテキストの再割当が必要です  
+もし SELinux を有効にするならば apache サービスからライブラリ参照できるように restorecon コマンドで libhiredis.so のラベルをリフレッシュしてください  
+##### libhiredis.so のラベルのリフレッシュ
+/usr/local/lib に導入した場合  
+```
+$ ls -Z /usr/local/lib/libhiredis.so*
+lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so -> libhiredis.so.0
+lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so.0 -> libhiredis.so.0.11
+-rwxrwxr-x. root root unconfined_u:object_r:user_home_t:s0 libhiredis.so.0.11
+$ restorecon /usr/local/lib/libhiredis.so.0.11
+$ ls -Z libhiredis.so*
+lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so -> libhiredis.so.0
+lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so.0 -> libhiredis.so.0.11
+-rwxrwxr-x. root root unconfined_u:object_r:lib_t:s0   libhiredis.so.0.11
+```
 
+SELinux の利用がシステムで不要であれば無効にします  
+(サーバの再起動がともないます)  
+```
+$ sudo vi /etc/selinux/config
+-----
+SELINUX=disabled
+-----
+$ sudo reboot
+```
+  
 #### apxs
 apacheモジュールのコンパイル・リンクに必要なツールです  
 It is a tool necessary to compile and link the apache module  
@@ -90,6 +116,19 @@ $ make
 $ sudo make install
 ```
 
+##### SELinux の注意点
+SELinux 利用時 かつ redis を冗長化構成(または別ポート起動)する場合はポートアクセスの許可設定が必要です  
+###### httpd_can_network_connect の開放
+```
+$ getsebool httpd_can_network_connect
+httpd_can_network_connect --> off
+
+$ sudo setsebool -P httpd_can_network_connect 1
+
+$ sudo getsebool httpd_can_network_connect
+httpd_can_network_connect --> on
+```
+
 ## Installation
 ### mod_doshelper
 ```
@@ -106,42 +145,14 @@ $ ./configure --with-apxs=/usr/local/apache2.X.XX/bin/apxs
 ```
   
 ##### doshelper 導入後、apache 起動でエラーが発生するケース  
-SELinux 利用時、または動的ライブラリ(libhiredis.so)が見つからない場合、エラーが発生します  
+動的ライブラリ(libhiredis.so)が見つからない場合、エラーが発生します  
+SELinux 対処後もライブラリが参照できない場合はライブラリ格納パスがシステムに認識されてません  
 ```
 doshelper.conf: Cannot load /etc/httpd/modules/mod_doshelper.so into server: libhiredis.so.0.13: cannot open shared object file: No such file or directory
 ```
 
-##### SELinux 利用時の注意点
-SELinux 利用時はライブラリ導入後はセキュリティコンテキストの再割当が必要です  
-SELinux を有効にするならば restorecon コマンドで libhiredis.so のラベルをリフレッシュし  
-apache サービスからライブラリが参照できるようにしてください  
-  
-##### libhiredis.so のラベルのリフレッシュ
-```
-$ cd /usr/local/lib
-$ ls -Z libhiredis.so*
-lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so -> libhiredis.so.0
-lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so.0 -> libhiredis.so.0.11
--rwxrwxr-x. root root unconfined_u:object_r:user_home_t:s0 libhiredis.so.0.11
-$ sudo /sbin/restorecon libhiredis.so.0.11
-$ ls -Z libhiredis.so*
-lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so -> libhiredis.so.0
-lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so.0 -> libhiredis.so.0.11
--rwxrwxr-x. root root unconfined_u:object_r:lib_t:s0   libhiredis.so.0.11
-```
-
-##### SELinux の無効化  
-SELinux が不要であれば無効にします  
-```
-$ sudo vi /etc/selinux/config
------
-SELINUX=disabled
------
-$ sudo reboot
-```
-  
-SELinux 対処後もライブラリが参照不可の場合は、ライブラリの格納パスがシステムに認識されてません  
-ldd コマンドで libhiredis.so のパスが not found  となっていることを確認できます  
+doshelper.so を ldd コマンドで確認します  
+( libhiredis.so への参照パスが not found  となっていることを確認します )  
 ```
 $ ldd .libs/mod_doshelper.so 
 	linux-vdso.so.1 =>  (0x00007ffc887a9000)
@@ -150,27 +161,28 @@ $ ldd .libs/mod_doshelper.so
 	/lib64/ld-linux-x86-64.so.2 (0x000000356ee00000)
 ```
   
-ライブラリの格納パスをシステムに認識させるか doshelper に静的ライブラリとして取り込むことで回避します  
+対処方法は以下となります  
 以下例は、/usr/local/lib を参照パスとした場合です  
   
-##### 回避策１　ldconfig を利用する
-システムに動的ライブラリ（libhiredis.so）を配置したパスを指示します  
-なお設定後は ldconfig を実行してシステムに反映を指示します  
+##### 回避策１　ldconfig の利用
+/etc/ld.so.conf.d に動的ライブラリ(libhiredis.so)の格納パスを記載した設定ファイルを配置し ldconfig でシステムに認識させます  
 ```
 $ sudo vi /etc/ld.so.conf.d/doshelper.conf
+-----
 /usr/local/lib
+-----
 $ sudo ldconfig
 $ sudo ldconfig -p | grep libhiredis.so
 ```
-##### 回避策２　LD_LIBRARY_PATH を利用する
-apache 起動スクリプトに 環境変数を利用してライブラリ参照パスをセットします  
+##### 回避策２　LD_LIBRARY_PATH の利用
+apache の起動スクリプト内で環境変数(LD_LIBRARY_PATH)に動的ライブラリ(libhiredis.so) の格納パスをセットします  
 ```
 $ sudo vi /etc/init.d/httpd
 export LD_LIBRARY_PATH=/usr/local/lib
 ```
 ##### 回避策３　静的ライブラリ（libhiredis.a）として取り込む
-hiredis ライブラリを doshelper に組み込んで一体化させます  
-ファイルサイズは大きくなりますが hiredis ライブラリをサーバごと導入する必要が無いため大規模な分散環境などで導入が困難な場合は、こちらの手法も検討ください  
+静的ライブラリ(libhiredis.a)を doshelper に組み込み一体化します  
+こちらの手法はファイルサイズは大きくなりますが、サーバごとに動的ライブラリ(libhiredis.so) を導入する必要が無いため大規模な分散環境などでは効率的です  
 ```
 $ cd doshelper-master
 $ vi Makefile
@@ -181,42 +193,26 @@ LIBS=/usr/local/lib/libhiredis.a
 $ make
 $ sudo make install
 ```
-##### 回避策４　hiredisのインストール先変更
-システムの動的ライブラリ参照パスが判明している場合は、hiredis のインストールにて格納パスを指示します  
+##### 回避策４　hiredisのインストール先を変更する
+システムの動的ライブラリ参照パスが判明している場合は、hiredis のインストール時に参照パスを指定します  
+(下記は /lib64 に格納する例です)
 ```
 $ cd hiredis-master/
 $ sudo make install PREFIX=/lib64
 ```
-##### SELinux 利用時の注意点
-SELinux 利用時は、上記対策に加え セキュリティコンテキストの再割当が必要です  
-以下のように restorecon コマンドで、apache サービスからライブラリが参照できるようにしてください  
-```
-$ ls -lZ /usr/local/lib
--rw-rw-r--. coco coco unconfined_u:object_r:user_home_t:s0 libhiredis.a
-lrwxrwxrwx. root root unconfined_u:object_r:lib_t:s0   libhiredis.so -> libhiredis.so.0.13
--rwxrwxr-x. coco coco unconfined_u:object_r:user_home_t:s0 libhiredis.so.0.13
-drwxr-xr-x. root root unconfined_u:object_r:lib_t:s0   pkgconfig
 
-$ sudo restorecon -RF /usr/local/lib
-
-$ ls -lZ /usr/local/lib
--rw-rw-r--. coco coco system_u:object_r:lib_t:s0       libhiredis.a
-lrwxrwxrwx. root root system_u:object_r:lib_t:s0       libhiredis.so -> libhiredis.so.0.13
--rwxrwxr-x. coco coco system_u:object_r:lib_t:s0       libhiredis.so.0.13
-drwxr-xr-x. root root system_u:object_r:lib_t:s0       pkgconfig
-```
-  
 ## Configuration
-設定ファイルのサンプルです  
-配布しているソースの"sample"ディレクトリに doshelper.conf として格納しています  
-以下を httpd.conf に記載（もしくは conf.d 配下に配置し Include）することで doshelper を利用することが可能となります  
+doshelperの設定説明となります  
 An sample configuration for mod_doshelper.  
+  
+配布ソースの"sample"ディレクトリにサンプルファイル(doshelper.conf)を格納しています  
+conf.d 配下に配置し httpd.conf から参照(include)もしくは直接記述することで利用が可能となります  
   
 doshelper.conf
 ```
 LoadModule setenvif_module modules/mod_setenvif.so
 <IfModule mod_setenvif.c>
-# doshelper Ignore
+## doshelper Ignore
 SetEnvIf Request_URI "\.(htm|html|js|css|gif|jpg|png)$" DOSHELPER_IGNORE
 # SetEnvIf User-Agent "(DoCoMo|UP.Browser|KDDI|J-PHONE|Vodafone|SoftBank)" DOSHELPER_IGNORE
 # SetEnvIf Remote_Addr "(^192.168.|^172.(1[6-9]|2[0-9]|3[0-1]).|^10.)" DOSHELPER_IGNORE
@@ -244,32 +240,32 @@ DoshelperDosWaitTime   60
 
 ## defense of the DoS of url unit
 ## 120 Seconds Shut-out at 3 Requests to 5 Seconds 
-DoshelperDosCase "^/foo/bar.php" ctime="5" request="3" wtime="120"
+# DoshelperDosCase "^/foo/bar.php" ctime="5" request="3" wtime="120"
 ## 5 Seconds Shut-out at 15 Requests to 10 Seconds 
-DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"
+# DoshelperDosCase "^/cgi-bin/hoge/" ctime="10" request="15" wtime="5"
 
 ## setting of the return code or block screen
 DoshelperReturnType 403
 # ErrorDocument 403 "403 Forbidden"
 # ErrorDocument 403 /hoge/ErrorDocument/403.html
-#DoshelperDosFilePath /var/www/doshelper/control/dos.html
+# DoshelperDosFilePath /var/www/doshelper/control/dos.html
 
-# setting of the ip control
+## setting of the ip control
 DoshelperControlAction off
 #DoshelperControlAction on
-# uri
-#DoshelperIpWhiteList  "/whitelist"
-#DoshelperIpWhiteSet   "/whitelistset"
-#DoshelperIpWhiteDel   "/whitelistdelete"
-#DoshelperIpBlackList  "/blacklist"
-#DoshelperIpBlackSet   "/blacklistset"
-#DoshelperIpBlackDel   "/blacklistdelete"
-#DoshelperControlFree  60
-#DoshelperDisplayCount 100
-# template file
-#DoshelperIpSetFormFilePath /var/www/doshelper/control/setform.html
-#DoshelperIpCompleteFilePath /var/www/doshelper/control/complete.html
-#DoshelperIpListFilePath  /var/www/doshelper/control/list.html
+## uri
+# DoshelperIpWhiteList  "/whitelist"
+# DoshelperIpWhiteSet   "/whitelistset"
+# DoshelperIpWhiteDel   "/whitelistdelete"
+# DoshelperIpBlackList  "/blacklist"
+# DoshelperIpBlackSet   "/blacklistset"
+# DoshelperIpBlackDel   "/blacklistdelete"
+# DoshelperControlFree  60
+# DoshelperDisplayCount 100
+## template file
+# DoshelperIpSetFormFilePath /var/www/doshelper/control/setform.html
+# DoshelperIpCompleteFilePath /var/www/doshelper/control/complete.html
+# DoshelperIpListFilePath  /var/www/doshelper/control/list.html
 
 </IfModule>
 
